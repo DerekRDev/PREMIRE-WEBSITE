@@ -1,43 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TourView } from './TourView';
 import { useAIAssistant } from '@/ui/providers/ai-assistant/AIAssistantProvider';
 import { PopupMessageUpdated } from './components/PopupMessageUpdated';
 import { CelebrationView } from './components/CelebrationView';
 import { ChoiceSelectorUpdated } from './components/ChoiceSelectorUpdated';
+import { AudioManager } from '@/core/ai/AudioManager';
+import { useTourConfig } from '@/hooks/useTourConfig';
+import { TourStep } from '@/utils/yamlLoader';
+import dynamic from 'next/dynamic';
 
-// Define tour steps
-const tourSteps = [
+const ReactConfetti = dynamic(() => import('react-confetti'), { ssr: false });
+
+// Fallback tour steps in case the YAML config fails to load
+const fallbackTourSteps: TourStep[] = [
   {
-    elementId: "navbar",
+    id: 'navbar',
+    selector: "nav#navbar",
     title: "Navigation",
     description: "Use the navigation bar to move between different sections of the application. You can access appointments, patient intake, your profile, and more.",
     position: "bottom" as const,
+    audioFile: "welcome/navigation-intro.mp3"
   },
   {
-    selector: ".need-help-button",
-    title: "Need Help?",
-    description: "Click this button anytime you need assistance with the platform. Our AI assistant will guide you through any process.",
-    position: "left" as const,
-  },
-  {
-    selector: ".appointment-section",
+    id: 'appointments',
+    selector: "a[href='/appointments']",
     title: "Appointment Scheduling",
-    description: "Easily schedule, view, and manage your appointments through our intuitive appointment scheduling system.",
+    description: "Let's start with appointments. Our platform makes it easy to schedule, reschedule, or cancel appointments.",
     position: "bottom" as const,
+    audioFile: "appointment/appointment_scheduling.mp3"
   },
   {
-    selector: ".patient-intake-section",
+    id: 'patient_intake',
+    selector: "a[href*='/intake']",
     title: "Patient Intake",
-    description: "Complete your registration and medical history online before your appointment to save time at the clinic.",
+    description: "To save time at the clinic, please complete your registration and medical history online before your appointment so we can streamline our services for you.",
     position: "bottom" as const,
+    audioFile: "patient-intake/patient_intake_button.mp3"
   },
   {
-    elementId: "billing-menu",
+    id: 'my_profile',
+    selector: "a[href*='/patient']",
+    title: "My Profile",
+    description: "View and update your personal information, contact details, and preferences in your profile section.",
+    position: "bottom" as const,
+    audioFile: "my-profile/my-profile-section.mp3"
+  },
+  {
+    id: 'referrals',
+    selector: "a[href='/referrals']",
+    title: "Referrals",
+    description: "Track and manage your referrals to specialists. Stay informed at every step of the referral process.",
+    position: "bottom" as const,
+    audioFile: "welcome/referrals-intro.mp3"
+  },
+  {
+    id: 'billing',
+    selector: "#billing-menu button",
     title: "Billing & Insurance",
     description: "Manage your insurance information, view statements, and make payments securely through our platform.",
     position: "top" as const,
+    audioFile: "welcome/billing-intro.mp3"
+  },
+  {
+    id: 'help',
+    selector: "a.need-help-button",
+    title: "Need Help?",
+    description: "Click this button anytime you need assistance with the platform. Our AI assistant will guide you through any process.",
+    position: "left" as const,
+    audioFile: "welcome/help-intro.mp3"
   }
 ];
 
@@ -48,6 +80,36 @@ export const AIAssistantContainer: React.FC = () => {
   const { state, currentStep, selectChoice, hideAssistant } = useAIAssistant();
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [isTourActive, setIsTourActive] = useState(false);
+  const [showTourComplete, setShowTourComplete] = useState(false);
+  const audioManagerRef = useRef<AudioManager | null>(null);
+  
+  // Load tour configuration from YAML
+  const { tourSteps: configuredTourSteps, loading: tourConfigLoading, error: tourConfigError } = useTourConfig('quick_tour');
+  
+  // Use configured tour steps if available, otherwise fall back to the default steps
+  const tourSteps = configuredTourSteps.length > 0 ? configuredTourSteps : fallbackTourSteps;
+  
+  // Log tour configuration details for debugging
+  useEffect(() => {
+    if (tourConfigError) {
+      console.error("Error loading tour configuration:", tourConfigError);
+      console.log("Using fallback tour steps");
+    } else if (!tourConfigLoading) {
+      console.log("Loaded tour steps from YAML:", configuredTourSteps);
+      console.log("Using configured tour steps:", tourSteps);
+    }
+  }, [tourConfigError, tourConfigLoading, configuredTourSteps, tourSteps]);
+  
+  // Initialize AudioManager on component mount
+  useEffect(() => {
+    audioManagerRef.current = new AudioManager();
+    return () => {
+      // Cleanup audio on unmount
+      if (audioManagerRef.current) {
+        audioManagerRef.current.stopAudio();
+      }
+    };
+  }, []);
   
   // Debug state changes
   useEffect(() => {
@@ -64,19 +126,70 @@ export const AIAssistantContainer: React.FC = () => {
     if (currentStep?.id === 'tour_intro') {
       // Initialize tour when the tour_intro step is active
       setIsTourActive(false); // Keep modal visible initially for intro
+      
+      // Play intro audio if available
+      const audioManager = audioManagerRef.current;
+      if (currentStep.audioFile && audioManager) {
+        audioManager.playAudio(currentStep.audioFile);
+      }
     } else if (currentStep?.id === 'tour_appointments') {
       // Start the actual tour highlighting when reaching tour_appointments step
       setIsTourActive(true);
       setTourStepIndex(0);
+      
+      // Stop any previous audio and play first tour step audio with a delay
+      const tourAudioManager = audioManagerRef.current;
+      if (tourAudioManager) {
+        tourAudioManager.stopAudio();
+        
+        setTimeout(() => {
+          if (tourSteps[0].audioFile && tourAudioManager) {
+            tourAudioManager.playAudio(tourSteps[0].audioFile);
+          }
+        }, 300);
+      }
     } else if (currentStep?.id === 'tour_complete') {
       // End the tour when reaching completion step
       setIsTourActive(false);
+      
+      // Stop any playing audio first then play completion audio
+      const audioManager = audioManagerRef.current;
+      if (audioManager) {
+        audioManager.stopAudio();
+        
+        setTimeout(() => {
+          audioManager.playAudio('welcome/tour_complete.mp3');
+        }, 300);
+      }
     }
   }, [currentStep?.id]);
 
   // Handle tour step change
   const handleTourStepChange = (index: number) => {
     setTourStepIndex(index);
+    
+    // Stop any previous audio first
+    const stepAudioManager = audioManagerRef.current;
+    if (stepAudioManager) {
+      stepAudioManager.stopAudio();
+    }
+    
+    // Slight delay before playing the new audio
+    setTimeout(() => {
+      // Play audio for this step if available
+      const currentTourStep = tourSteps[index];
+      if (currentTourStep.audioFile && stepAudioManager) {
+        console.log(`Playing audio for step ${index}: ${currentTourStep.audioFile}`);
+        console.log(`Step details:`, currentTourStep);
+        stepAudioManager.playAudio(currentTourStep.audioFile, undefined, (error) => {
+          if (error) {
+            console.error(`Error playing audio for step ${index}:`, error);
+          }
+        });
+      } else {
+        console.warn(`No audio file found for step ${index} or audio manager not initialized`, currentTourStep);
+      }
+    }, 300);
     
     // If this is the last step, prepare to end the tour
     if (index === tourSteps.length - 1) {
@@ -87,7 +200,33 @@ export const AIAssistantContainer: React.FC = () => {
   // Handle tour completion
   const handleTourComplete = () => {
     setIsTourActive(false);
-    // Move to the next step in the workflow
+    
+    // Stop any playing audio first
+    const audioManager = audioManagerRef.current;
+    if (audioManager) {
+      audioManager.stopAudio();
+      
+      // Immediately show confetti view with debug log
+      console.log('🎉 Showing tour complete view with confetti');
+      setShowTourComplete(true);
+      
+      // Slight delay before playing completion audio
+      setTimeout(() => {
+        // Play the tour completion audio
+        console.log('🔊 Playing tour completion audio');
+        audioManager.playAudio('welcome/tour_complete.mp3');
+      }, 300);
+    } else {
+      // If audio manager isn't available, just show the tour complete view
+      setShowTourComplete(true);
+    }
+  };
+  
+  // Handle continuing after confetti
+  const handleTourCompleteClose = () => {
+    setShowTourComplete(false);
+    
+    // Continue with workflow
     if (currentStep?.choices && currentStep.choices.length > 0) {
       // Find the "continue" choice
       const continueChoice = currentStep.choices.find(choice => 
@@ -123,7 +262,7 @@ export const AIAssistantContainer: React.FC = () => {
             choices={currentStep.choices || []}
             onChoiceSelected={selectChoice}
             onClose={hideAssistant}
-            useVoice={false} /* Disabled to avoid duplicate audio - workflow handles audio */
+            useVoice={false} /* Disabled to avoid duplicate audio - workflow handles audio explicitly */
           />
         );
 
@@ -197,7 +336,7 @@ export const AIAssistantContainer: React.FC = () => {
   return (
     <>
       {/* Regular assistant UI */}
-      {!isTourActive && (
+      {!isTourActive && !showTourComplete && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="max-w-md w-full mx-4">
             {renderContent()}
@@ -227,6 +366,35 @@ export const AIAssistantContainer: React.FC = () => {
           }}
           onComplete={handleTourComplete}
         />
+      )}
+      
+      {/* Tour complete celebration UI - always render if showTourComplete is true */}
+      {showTourComplete && (
+        <div className="fixed inset-0 z-[12000] flex items-center justify-center">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="relative z-[12001] bg-white p-8 rounded-xl shadow-2xl max-w-md w-11/12 text-center">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <ReactConfetti
+                width={window.innerWidth}
+                height={window.innerHeight}
+                recycle={false}
+                numberOfPieces={1000}
+                gravity={0.3}
+              />
+            </div>
+            <div className="text-5xl mb-6">🎉</div>
+            <h2 className="text-2xl font-bold text-blue-600 mb-4">Tour Complete!</h2>
+            <p className="text-gray-700 mb-8">Congratulations! You've completed the quick tour of Premier Healthcare. Feel free to explore the platform on your own.</p>
+            <div className="flex justify-center space-x-4">
+              <button 
+                onClick={handleTourCompleteClose}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

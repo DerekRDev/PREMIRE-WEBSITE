@@ -12,6 +12,7 @@ interface PopupMessageProps {
   onClose: () => void;
   position?: 'top' | 'bottom' | 'center';
   type?: 'info' | 'success' | 'warning' | 'error';
+  useVoice?: boolean;
 }
 
 export const PopupMessageUpdated: React.FC<PopupMessageProps> = ({
@@ -20,7 +21,8 @@ export const PopupMessageUpdated: React.FC<PopupMessageProps> = ({
   onChoiceSelected,
   onClose,
   position = 'center',
-  type = 'info'
+  type = 'info',
+  useVoice = false
 }) => {
   // Set positioning classes based on position prop
   const positionClasses = {

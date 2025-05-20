@@ -40,8 +40,11 @@ export class AudioManager {
 
   /**
    * Play an audio file
+   * @param audioFile - Path to the audio file relative to audio base path
+   * @param onComplete - Optional callback when audio completes
+   * @param onError - Optional callback when audio fails to play
    */
-  public playAudio(audioFile: string, onComplete?: () => void): boolean {
+  public playAudio(audioFile: string, onComplete?: () => void, onError?: (error: any) => void): boolean {
     if (this.isMuted) {
       console.log(`Audio is muted, skipping playback of ${audioFile}`);
       if (onComplete) {
@@ -60,7 +63,8 @@ export class AudioManager {
     }
 
     const audioPath = `${this.audioBasePath}/${audioFile}`;
-
+    console.log(`Attempting to play audio from path: ${audioPath}`);
+    
     // Stop any currently playing audio
     if (this.currentAudio) {
       this.stopAudio();
@@ -87,6 +91,13 @@ export class AudioManager {
       audioElement.addEventListener("error", (e) => {
         console.error(`Error playing audio ${audioPath}:`, e);
         this.currentAudio = null;
+        
+        // Call error callback if provided
+        if (onError) {
+          onError(e);
+        }
+        
+        // Call complete callback to continue flow
         if (this.onAudioCompleteCallback) {
           const callback = this.onAudioCompleteCallback;
           this.onAudioCompleteCallback = null;
@@ -116,6 +127,13 @@ export class AudioManager {
           console.error(`Autoplay prevented for ${audioPath}:`, error);
           // Autoplay was prevented, consider this as completed
           this.currentAudio = null;
+          
+          // Call error callback if provided
+          if (onError) {
+            onError(error);
+          }
+          
+          // Call complete callback to continue flow
           if (this.onAudioCompleteCallback) {
             const callback = this.onAudioCompleteCallback;
             this.onAudioCompleteCallback = null;

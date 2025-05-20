@@ -75,6 +75,15 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
   const getTooltipStyle = () => {
     if (!targetRect) return {};
     
+    // For center positioning, use these styles regardless of position
+    return {
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    };
+    
+    // Original position-based tooltip placement code kept for reference
+    /* 
     const padding = 10; // Padding around the element
     
     switch (position) {
@@ -109,6 +118,7 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
           transform: 'translateX(-50%)',
         };
     }
+    */
   };
 
   // Create the highlight cutout effect
@@ -123,6 +133,9 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
       width: `${targetRect.width + (padding * 2)}px`,
       height: `${targetRect.height + (padding * 2)}px`,
       borderRadius: '4px',
+      border: '2px solid #3b82f6',
+      boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
+      zIndex: 10000
     };
   };
 
@@ -134,16 +147,12 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
   // Use portal to render the overlay at the document root
   return createPortal(
     <div className="tour-overlay" ref={overlayRef}>
-      {/* Semi-transparent overlay with blur */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-[9999]"
-        style={{ animation: 'fadeIn 0.3s ease-in-out' }}
-      />
+      {/* Removed overlay since we're using boxShadow for the cutout effect */}
       
-      {/* Highlight cutout */}
+      {/* Highlight focus area - using a cutout effect */}
       <div
         ref={highlightRef}
-        className="absolute bg-white bg-opacity-0 border-2 border-blue-500 z-[10000] shadow-lg"
+        className="absolute z-[10000]"
         style={{
           ...getHighlightStyle(),
           animation: 'pulse 2s infinite',
@@ -152,7 +161,7 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
       
       {/* Tooltip */}
       <div 
-        className="fixed bg-white p-4 rounded-lg shadow-xl z-[10001] max-w-md"
+        className="fixed bg-white p-4 rounded-lg shadow-xl z-[10001] max-w-md w-[90%] md:w-[500px]"
         style={{
           ...getTooltipStyle(),
           animation: 'fadeIn 0.3s ease-in-out',
@@ -174,6 +183,12 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
           </div>
           
           <div>
+            <button
+              onClick={onClose}
+              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition mr-2"
+            >
+              Exit Tour
+            </button>
             {isLast ? (
               <button
                 onClick={onClose}
@@ -201,9 +216,15 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
         }
         
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-          70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          0% { 
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+          }
+          70% { 
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+          }
+          100% { 
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+          }
         }
       `}</style>
     </div>,

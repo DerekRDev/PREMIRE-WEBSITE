@@ -15,6 +15,14 @@ const nextConfig = {
   images: {
     domains: ['example.com'],
   },
+  // Allow importing YAML files
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.ya?ml$/,
+      use: 'yaml-loader',
+    });
+    return config;
+  },
 }
 
 module.exports = nextConfig

@@ -10,6 +10,7 @@ interface TourStep {
   title: string;
   description: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
+  audioFile?: string; // Path to the audio file for this step
 }
 
 interface TourViewProps {
