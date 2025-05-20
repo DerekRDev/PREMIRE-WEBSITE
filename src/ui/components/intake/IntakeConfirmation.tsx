@@ -106,7 +106,7 @@ export const IntakeConfirmation: React.FC<IntakeConfirmationProps> = ({
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-blue-700 mb-4">Your intake is complete!</h2>
-            <p className="text-xl text-gray-700">We're taking you to your appointments now...</p>
+            <p className="text-xl text-gray-700">We&apos;re taking you to your appointments now...</p>
           </div>
         </div>
       )}

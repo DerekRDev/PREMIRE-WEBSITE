@@ -124,7 +124,7 @@ export default function IntakeConfirmationPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
             <h3 className="text-lg font-semibold text-blue-800 mb-3">Next Steps</h3>
             <ol className="list-decimal pl-5 space-y-2">
-              <li>We'll review your intake information within 24-48 hours</li>
+              <li>We&apos;ll review your intake information within 24-48 hours</li>
               <li>Our staff may contact you if we need additional information</li>
               <li>Please arrive 15 minutes before your scheduled appointment</li>
               <li>Bring your insurance card and a valid photo ID to your appointment</li>

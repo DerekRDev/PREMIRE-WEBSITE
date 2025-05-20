@@ -56,7 +56,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
             Welcome back, {patient.firstName}!
           </h1>
           <p className="text-neutral-600 mt-1">
-            Here's an overview of your healthcare information.
+            Here&apos;s an overview of your healthcare information.
           </p>
         </div>
         
@@ -83,7 +83,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
           
           {upcomingAppointments.length === 0 ? (
             <div className="text-center py-8 text-neutral-500">
-              <p>You don't have any upcoming appointments.</p>
+              <p>You don&apos;t have any upcoming appointments.</p>
               <Button
                 variant="outline"
                 onClick={onScheduleAppointment}

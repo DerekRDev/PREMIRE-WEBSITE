@@ -192,7 +192,7 @@ export default function ReferralDetailsPage({ params }: { params: { id: string }
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-700">Referral Not Found</h2>
-          <p className="mt-2 text-gray-500">The referral you're looking for does not exist or has been removed.</p>
+          <p className="mt-2 text-gray-500">The referral you&apos;re looking for does not exist or has been removed.</p>
           <button 
             className="mt-6 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
             onClick={() => router.push('/referrals')}

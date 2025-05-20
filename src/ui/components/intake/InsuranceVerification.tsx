@@ -205,7 +205,7 @@ export const InsuranceVerification: React.FC<InsuranceVerificationProps> = ({
       <h2 className="text-xl font-bold mb-4">Insurance Information</h2>
       <div className="mb-6">
         <p className="text-sm text-gray-600 mb-2">
-          Please provide your insurance information. We'll verify your coverage and benefits before your appointment.
+          Please provide your insurance information. We&apos;ll verify your coverage and benefits before your appointment.
           This helps us provide you with an estimate of your out-of-pocket costs.
         </p>
         
@@ -215,7 +215,7 @@ export const InsuranceVerification: React.FC<InsuranceVerificationProps> = ({
             <li>Insurance provider name</li>
             <li>Member ID (found on your insurance card)</li>
             <li>At least one insurance must be marked as primary</li>
-            <li>If you're not the primary policyholder, you'll need the subscriber's name and date of birth</li>
+            <li>If you&apos;re not the primary policyholder, you&apos;ll need the subscriber&apos;s name and date of birth</li>
           </ul>
         </div>
       </div>
