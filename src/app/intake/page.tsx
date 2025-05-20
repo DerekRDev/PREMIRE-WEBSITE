@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { IntakeFlow } from '@/ui/components/intake';
 import { useIntakeForm } from '@/ui/hooks';
 
-export default function IntakePage() {
+function IntakePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -86,5 +86,19 @@ export default function IntakePage() {
         useIntakeFormHook={intakeFormHook}
       />
     </div>
+  );
+}
+
+export default function IntakePage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-8">Loading intake form...</h1>
+        </div>
+      </div>
+    }>
+      <IntakePageContent />
+    </Suspense>
   );
 }

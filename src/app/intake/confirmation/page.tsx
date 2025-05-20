@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { IntakeConfirmation } from '@/ui/components/intake';
 import { useIntakeForm } from '@/ui/hooks';
 import { Button } from '@/ui/design-system/components';
 
-export default function IntakeConfirmationPage() {
+function IntakeConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -149,5 +149,19 @@ export default function IntakeConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function IntakeConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-8">Loading...</h1>
+        </div>
+      </div>
+    }>
+      <IntakeConfirmationContent />
+    </Suspense>
   );
 }

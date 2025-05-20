@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CreateReferralRequest } from '@/core/entities/Referral';
 import { Provider } from '@/core/entities/Provider';
 import { ReferralForm } from '@/ui/components/referral';
 
-export default function NewReferralPage() {
+function NewReferralContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId') || '';
@@ -132,5 +132,24 @@ export default function NewReferralPage() {
         <p>Need help finding a specialist? Call (555) 123-4567 for assistance.</p>
       </div>
     </div>
+  );
+}
+
+export default function NewReferralPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6">Create New Referral</h1>
+        <div className="animate-pulse p-6 bg-white rounded-lg shadow">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="h-10 bg-gray-200 rounded w-full mb-6"></div>
+          <div className="h-10 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    }>
+      <NewReferralContent />
+    </Suspense>
   );
 }
