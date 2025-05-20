@@ -1,0 +1,3 @@
+export class WorkflowEngine {
+  // ...existing WorkflowEngine implementation...
+}
