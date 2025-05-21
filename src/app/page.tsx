@@ -128,31 +128,45 @@ export default function Home() {
       </section>
 
       {/* Core Features Section */}
-      <section className="py-12 md:py-20">
+      <section className="py-12 md:py-20 bg-gradient-to-b from-white to-primary-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-primary-700 mb-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-block bg-primary-100 text-primary-700 px-4 py-1 rounded-full text-sm font-medium mb-3">Our Platform</div>
+              <h2 className="text-2xl md:text-4xl font-bold text-primary-800 mb-4">
                 Streamlined Healthcare Platform
               </h2>
-              <p className="text-lg text-neutral-600">
+              <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
                 Our digital platform makes managing your healthcare simple and efficient
               </p>
             </div>
 
-            <div className="grid gap-8 mb-12">
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
               <Card
-                title="Patient Scheduling"
-                className="transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-primary-500"
+                className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 rounded-xl overflow-hidden border-0 shadow-lg"
               >
-                <p className="text-neutral-600 mb-4">
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary-500"></div>
+                <div className="flex justify-center mb-6">
+                  <div className="bg-primary-100 p-4 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-primary-700 mb-3 text-center">Patient Scheduling</h3>
+                <p className="text-neutral-600 mb-6 text-center">
                   Find the perfect appointment time with your preferred provider. Our
                   scheduling system makes it easy to find and book appointments.
                 </p>
-                <div className="flex justify-end">
+                <div className="flex justify-center mt-auto">
                   <Button 
                     variant="primary" 
                     onClick={() => router.push('/appointments')}
+                    rightIcon={
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    }
                   >
                     Schedule Now
                   </Button>
@@ -160,17 +174,30 @@ export default function Home() {
               </Card>
 
               <Card 
-                title="Patient Intake Forms" 
-                className="transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-secondary-500"
+                className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 rounded-xl overflow-hidden border-0 shadow-lg"
               >
-                <p className="text-neutral-600 mb-4">
+                <div className="absolute top-0 left-0 w-full h-1 bg-secondary-500"></div>
+                <div className="flex justify-center mb-6">
+                  <div className="bg-secondary-100 p-4 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-secondary-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-secondary-700 mb-3 text-center">Patient Intake Forms</h3>
+                <p className="text-neutral-600 mb-6 text-center">
                   Complete your registration and intake forms online before your appointment.
                   Save time and reduce paperwork during your visit.
                 </p>
-                <div className="flex justify-end">
+                <div className="flex justify-center mt-auto">
                   <Button 
-                    variant="primary"
+                    variant="secondary"
                     onClick={() => router.push('/intake?patientId=demopatient123')}
+                    rightIcon={
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    }
                   >
                     Start Intake
                   </Button>
@@ -178,22 +205,51 @@ export default function Home() {
               </Card>
 
               <Card 
-                title="Referral Management" 
-                className="transform transition-all duration-300 hover:shadow-md hover:-translate-y-1 border-l-4 border-l-accent-500"
+                className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 rounded-xl overflow-hidden border-0 shadow-lg"
               >
-                <p className="text-neutral-600 mb-4">
+                <div className="absolute top-0 left-0 w-full h-1 bg-accent-500"></div>
+                <div className="flex justify-center mb-6">
+                  <div className="bg-accent-100 p-4 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-accent-600" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-accent-700 mb-3 text-center">Referral Management</h3>
+                <p className="text-neutral-600 mb-6 text-center">
                   Easily track and manage your referrals to specialists. Stay informed
                   at every step of the referral process.
                 </p>
-                <div className="flex justify-end">
+                <div className="flex justify-center mt-auto">
                   <Button 
-                    variant="primary"
+                    variant="outline"
+                    className="bg-white text-accent-600 border-accent-500 hover:bg-accent-50"
                     onClick={() => router.push('/referrals')}
+                    rightIcon={
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    }
                   >
                     Manage Referrals
                   </Button>
                 </div>
               </Card>
+            </div>
+            
+            <div className="text-center">
+              <Button 
+                variant="text"
+                size="large"
+                onClick={() => router.push('/services')}
+                rightIcon={
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                }
+              >
+                Explore All Features
+              </Button>
             </div>
           </div>
         </div>
@@ -249,29 +305,31 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-accent-500 to-accent-600 text-white">
+      <section className="py-12 md:py-16 bg-gradient-to-r from-primary-50 to-primary-100 border-y border-primary-200">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to experience better healthcare?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of patients who trust Premier Healthcare for their medical needs.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button 
-              variant="secondary" 
-              size="large"
-              onClick={() => router.push('/appointments')}
-              className="w-full sm:w-auto"
-            >
-              Schedule an Appointment
-            </Button>
-            <Button 
-              variant="outline" 
-              size="large"
-              onClick={() => router.push('/contact')}
-              className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white hover:bg-opacity-10"
-            >
-              Contact Us
-            </Button>
+          <div className="max-w-3xl mx-auto bg-white p-8 md:p-10 rounded-xl shadow-sm border border-neutral-100">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-primary-700">Ready to experience better healthcare?</h2>
+            <p className="text-lg mb-8 text-neutral-600 max-w-2xl mx-auto">
+              Join thousands of patients who trust Premier Healthcare for their medical needs.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button 
+                variant="primary" 
+                size="large"
+                onClick={() => router.push('/appointments')}
+                className="w-full sm:w-auto"
+              >
+                Schedule an Appointment
+              </Button>
+              <Button 
+                variant="outline" 
+                size="large"
+                onClick={() => router.push('/contact')}
+                className="w-full sm:w-auto border-primary-500 text-primary-700 hover:bg-primary-50"
+              >
+                Contact Us
+              </Button>
+            </div>
           </div>
         </div>
       </section>

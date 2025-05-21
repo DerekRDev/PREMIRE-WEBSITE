@@ -13,6 +13,7 @@ interface TourStep {
   description: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
   audioFile?: string; // Path to the audio file for this step
+  id?: string; // Optional ID for the step
 }
 
 interface TourViewProps {
@@ -32,6 +33,14 @@ export const TourView: React.FC<TourViewProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(currentStepIndex);
   const interactionManager = useRef(TourInteractionManager.getInstance());
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      const tourAudioService = TourAudioService.getInstance();
+      tourAudioService.stopAudio();
+    };
+  }, []);
 
   useEffect(() => {
     setActiveStep(currentStepIndex);
@@ -60,12 +69,17 @@ export const TourView: React.FC<TourViewProps> = ({
     }
   };
 
+  // Helper function to get step identifier
+  const getStepId = (step: TourStep, index: number) => {
+    return step.id || `step_${index}`;
+  };
+
   // Handle navigation between steps
   const handleNext = () => {
     const nextStep = activeStep + 1;
     if (nextStep < steps.length) {
-      const currentStepId = steps[activeStep]?.id || `step_${activeStep}`;
-      const nextStepId = steps[nextStep]?.id || `step_${nextStep}`;
+      const currentStepId = getStepId(steps[activeStep], activeStep);
+      const nextStepId = getStepId(steps[nextStep], nextStep);
       
       // Use the interaction manager to handle next step navigation
       interactionManager.current.handleNextStep(
@@ -93,7 +107,7 @@ export const TourView: React.FC<TourViewProps> = ({
   const handlePrevious = () => {
     const prevStep = activeStep - 1;
     if (prevStep >= 0) {
-      const currentStepId = steps[activeStep]?.id || `step_${activeStep}`;
+      const currentStepId = getStepId(steps[activeStep], activeStep);
       
       // Use the interaction manager to handle previous step navigation
       interactionManager.current.handlePreviousStep(
@@ -131,14 +145,6 @@ export const TourView: React.FC<TourViewProps> = ({
   }
 
   const currentStep = steps[activeStep];
-
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => {
-      const tourAudioService = TourAudioService.getInstance();
-      tourAudioService.stopAudio();
-    };
-  }, []);
 
   return (
     <TourHighlight

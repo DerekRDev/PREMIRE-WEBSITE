@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/ui/providers';
 import { AIAssistantProvider } from '@/ui/providers/ai-assistant/AIAssistantProvider';
 import { ToastProvider } from '@/ui/design-system/components/Toast';
 import { Header, Footer, Breadcrumbs } from '@/ui/components/common';
-import { AIAssistantButton } from '@/ui/components/ai-assistant/AIAssistantButton';
+import { NavbarAIButton } from '@/ui/components/ai-assistant';
 import { AIAssistantContainer } from '@/ui/components/ai-assistant/AIAssistantContainer';
 import { allWorkflows } from '@/core/ai/workflows';
 
@@ -30,7 +30,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             <Footer />
             
             {/* AI Assistant Components */}
-            <AIAssistantButton />
+            {/* Mobile floating AI button */}
+            <div className="md:hidden fixed bottom-4 right-4 z-50">
+              <NavbarAIButton />
+            </div>
             <AIAssistantContainer />
           </div>
         </AIAssistantProvider>

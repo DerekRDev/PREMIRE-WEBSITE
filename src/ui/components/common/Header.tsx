@@ -2,6 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { NavbarAIButton } from '@/ui/components/ai-assistant';
+
+// Create a context for menu control
+export const MenuContext = React.createContext<{
+  setIsMenuOpen: (isOpen: boolean) => void;
+}>({ setIsMenuOpen: () => {} });
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,10 +19,10 @@ export const Header: React.FC = () => {
   // Define navigation links
   const navigationLinks = [
     { href: '/', label: 'Home' },
-    { href: '/appointments', label: 'Appointments' },
-    { href: '/intake?patientId=demopatient123', label: 'Patient Intake' }, // Added demo patient ID
-    { href: '/patient', label: 'My Profile' },
-    { href: '/referrals', label: 'Referrals' },
+    { href: '/appointments', label: 'Appointments', className: 'appointment-section' },
+    { href: '/intake', label: 'Patient Intake', className: 'patient-intake-section' },
+    { href: '/patient', label: 'My Profile', className: 'profile-section' },
+    { href: '/referrals', label: 'Referrals', className: 'referrals-section' },
   ];
   
   // Define dropdown menu items
@@ -46,7 +52,8 @@ export const Header: React.FC = () => {
   }, [dropdownRef]);
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <MenuContext.Provider value={{ setIsMenuOpen }}>
+      <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-24">
           <div className="flex-shrink-0">
@@ -74,7 +81,7 @@ export const Header: React.FC = () => {
                   pathname === link.href
                     ? 'bg-primary-50 text-primary-700'
                     : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
-                } ${link.href === '/appointments' ? 'appointment-section' : ''} ${link.href === '/intake' ? 'patient-intake-section' : ''}`}
+                } ${link.className || ''}`}
               >
                 {link.label}
               </Link>
@@ -117,12 +124,9 @@ export const Header: React.FC = () => {
               )}
             </div>
             
-            <Link
-              href="/help"
-              className="need-help-button ml-4 px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
-            >
-              Need Help?
-            </Link>
+            <div className="ml-4">
+              <NavbarAIButton />
+            </div>
           </nav>
           
           {/* Mobile menu button */}
@@ -159,7 +163,7 @@ export const Header: React.FC = () => {
                 pathname === link.href
                   ? 'bg-primary-50 text-primary-700'
                   : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
-              }`}
+              } ${link.className || ''}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {link.label}
@@ -206,15 +210,12 @@ export const Header: React.FC = () => {
             )}
           </div>
           
-          <Link
-            href="/help"
-            className="need-help-button block px-3 py-2 rounded-md text-base font-medium bg-primary-600 text-white hover:bg-primary-700 mt-3"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Need Help?
-          </Link>
+          <div className="mt-3 flex justify-center" onClick={() => setIsMenuOpen(false)}>
+            <NavbarAIButton />
+          </div>
         </div>
       </div>
     </header>
+    </MenuContext.Provider>
   );
 };
