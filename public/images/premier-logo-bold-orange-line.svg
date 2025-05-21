@@ -1,0 +1,15 @@
+<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Medical symbol -->
+  <circle cx="35" cy="35" r="20" fill="#007f3d" />
+  <rect x="25" y="32" width="20" height="6" rx="2" fill="white" />
+  <rect x="32" y="25" width="6" height="20" rx="2" fill="white" />
+  
+  <!-- Improved typography for PREMIER with better font -->
+  <text x="70" y="40" font-family="'Trebuchet MS', Arial, sans-serif" font-size="24" font-weight="700" fill="#007f3d" letter-spacing="1.2">PREMIER</text>
+  
+  <!-- BOLD orange dividing line -->
+  <rect x="70" y="45" width="170" height="3" rx="1.5" fill="#f7941d" />
+  
+  <!-- Community Healthcare text -->
+  <text x="70" y="62" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#007f3d" letter-spacing="0.3">Community Healthcare</text>
+</svg>

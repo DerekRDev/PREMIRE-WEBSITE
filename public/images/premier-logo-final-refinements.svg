@@ -1,0 +1,35 @@
+<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Enhanced sun with gradients -->
+  <defs>
+    <radialGradient id="sunGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#faa21b" />
+      <stop offset="90%" stop-color="#f7941d" />
+      <stop offset="100%" stop-color="#f15a29" />
+    </radialGradient>
+  </defs>
+
+  <!-- Larger sun center -->
+  <circle cx="35" cy="35" r="14" fill="url(#sunGradient)" />
+  
+  <!-- Mathematically precise rays using a loop-like pattern -->
+  <!-- Primary rays (longer) -->
+  <path d="M35 14 L35 8" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M35 56 L35 62" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M14 35 L8 35" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M56 35 L62 35" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Secondary rays (shorter, at 45° angles) -->
+  <path d="M21 21 L17 17" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M49 49 L53 53" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M21 49 L17 53" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  <path d="M49 21 L53 17" stroke="#f7941d" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Improved typography for PREMIER with better font -->
+  <text x="78" y="40" font-family="'Trebuchet MS', Arial, sans-serif" font-size="24" font-weight="700" fill="#007f3d" letter-spacing="1.2">PREMIER</text>
+  
+  <!-- THINNER orange dividing line -->
+  <rect x="78" y="45" width="170" height="1.5" rx="0.75" fill="#f7941d" />
+  
+  <!-- Community Healthcare text in DARK MAROON -->
+  <text x="78" y="62" font-family="Arial, sans-serif" font-size="14" font-weight="500" fill="#800020" letter-spacing="0.3">Community Healthcare</text>
+</svg>
