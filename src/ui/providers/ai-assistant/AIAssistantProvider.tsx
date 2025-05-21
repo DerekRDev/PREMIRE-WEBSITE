@@ -55,6 +55,11 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState<WorkflowStep | null>(null);
   const [state, setState] = useState<AssistantState>(engine.getState());
+  
+  // Keep track of assistant visibility in the audio service
+  useEffect(() => {
+    tourAudioService.setAssistantVisible(state.uiState !== "hidden");
+  }, [state.uiState, tourAudioService]);
 
   // Set analytics enabled/disabled
   useEffect(() => {
@@ -67,17 +72,26 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
 
   // Initialize the assistant
   const initialize = useCallback(() => {
+    console.log("AI Assistant initializing");
     setIsActive(true);
+    
+    // Reset audio state when assistant is reopened
+    tourAudioService.reset();
+    
     analytics.trackEvent({
       type: 'assistant_open',
     });
     console.log("AI Assistant initialized");
-  }, [analytics]);
+  }, [analytics, tourAudioService]);
 
   // Shutdown the assistant
   const shutdown = useCallback(() => {
+    console.log("AI Assistant shutting down");
     setIsActive(false);
+    
+    // Stop any playing audio
     tourAudioService.stopAudio();
+    
     analytics.trackEvent({
       type: 'assistant_close',
     });
@@ -247,11 +261,20 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
     analytics.trackEvent({
       type: 'assistant_close',
     });
+    
+    console.log("Hiding AI Assistant");
+    
+    // Stop any playing audio
+    tourAudioService.stopAudio();
+    
+    // Reset audio state when assistant is hidden
+    tourAudioService.reset();
+    
     setState((prevState) => ({
       ...prevState,
       uiState: "hidden",
     }));
-  }, [analytics]);
+  }, [analytics, tourAudioService]);
 
   // Clean up on unmount
   useEffect(() => {

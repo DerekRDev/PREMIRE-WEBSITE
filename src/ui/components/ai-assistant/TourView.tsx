@@ -99,6 +99,14 @@ export const TourView: React.FC<TourViewProps> = ({
 
   const currentStep = steps[activeStep];
 
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      const tourAudioService = TourAudioService.getInstance();
+      tourAudioService.stopAudio();
+    };
+  }, []);
+
   return (
     <TourHighlight
       selector={currentStep.selector}

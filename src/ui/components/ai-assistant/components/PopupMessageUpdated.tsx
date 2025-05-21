@@ -83,9 +83,19 @@ export const PopupMessageUpdated: React.FC<PopupMessageUpdatedProps> = ({
         ))}
       </div>
       <button 
-        onClick={onClose} 
-        className="mt-4 text-gray-500"
+        onClick={() => {
+          // Stop any audio that might be playing
+          if (typeof window !== 'undefined') {
+            const tourAudioService = require('@/services/TourAudioService').TourAudioService.getInstance();
+            tourAudioService.stopAudio();
+          }
+          // Call the provided onClose handler
+          onClose();
+        }} 
+        className="mt-4 text-gray-500 hover:text-gray-700 transition-colors"
         disabled={isSpeaking}
+        aria-label="Close assistant"
+        data-testid="close-assistant-button"
       >
         Close
       </button>

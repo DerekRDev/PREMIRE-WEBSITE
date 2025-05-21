@@ -9,6 +9,9 @@ export class TourAudioService {
   private static instance: TourAudioService;
   private audioManager: AudioManager;
   private lastPlayedStep: string | null = null;
+  private isPlaying: boolean = false;
+  private currentAudioFile: string | null = null;
+  private isAssistantVisible: boolean = false;
 
   private constructor() {
     this.audioManager = new AudioManager('/audio');
@@ -29,10 +32,26 @@ export class TourAudioService {
    * @param stepId The ID of the current step
    * @param audioFile The audio file path to play
    * @param onComplete Optional callback when audio completes
+   * @param force Force play even if the step has been played before
    */
-  public playStepAudio(stepId: string, audioFile: string, onComplete?: () => void): void {
-    // Prevent duplicate audio if the same step tries to play multiple times
-    if (this.lastPlayedStep === stepId) {
+  public playStepAudio(
+    stepId: string, 
+    audioFile: string, 
+    onComplete?: () => void,
+    force: boolean = false
+  ): void {
+    // Always stop current audio before playing new audio to prevent overlap
+    this.stopAudio();
+    
+    // Don't play if the assistant is hidden
+    if (!this.isAssistantVisible) {
+      console.log(`Assistant is hidden, not playing audio for step ${stepId}`);
+      if (onComplete) onComplete();
+      return;
+    }
+    
+    // Prevent duplicate audio if the same step tries to play multiple times (unless forced)
+    if (!force && this.lastPlayedStep === stepId) {
       console.log(`Audio for step ${stepId} already played, skipping duplicate`);
       if (onComplete) onComplete();
       return;
@@ -40,9 +59,12 @@ export class TourAudioService {
 
     console.log(`TourAudioService: Playing audio for step ${stepId}: ${audioFile}`);
     this.lastPlayedStep = stepId;
+    this.currentAudioFile = audioFile;
+    this.isPlaying = true;
     
     this.audioManager.playAudio(audioFile, () => {
       console.log(`TourAudioService: Audio completed for step ${stepId}`);
+      this.isPlaying = false;
       if (onComplete) onComplete();
     });
   }
@@ -51,7 +73,11 @@ export class TourAudioService {
    * Stop any currently playing audio
    */
   public stopAudio(): void {
-    this.audioManager.stopAudio();
+    if (this.isPlaying) {
+      console.log(`TourAudioService: Stopping audio playback`);
+      this.audioManager.stopAudio();
+      this.isPlaying = false;
+    }
   }
 
   /**
@@ -59,6 +85,9 @@ export class TourAudioService {
    */
   public setMute(muted: boolean): void {
     this.audioManager.setMute(muted);
+    if (muted) {
+      this.isPlaying = false;
+    }
   }
 
   /**
@@ -70,10 +99,49 @@ export class TourAudioService {
 
   /**
    * Reset the last played step tracking
-   * Used when starting a new tour
+   * Used when starting a new tour or reopening the assistant
    */
   public reset(): void {
+    console.log('TourAudioService: Resetting audio state');
     this.lastPlayedStep = null;
-    this.audioManager.stopAudio();
+    this.currentAudioFile = null;
+    this.stopAudio();
+  }
+  
+  /**
+   * Set assistant visibility state
+   * Used to prevent audio from playing when assistant is hidden
+   */
+  public setAssistantVisible(visible: boolean): void {
+    console.log(`TourAudioService: Setting assistant visible = ${visible}`);
+    this.isAssistantVisible = visible;
+    
+    // Stop audio if assistant is hidden
+    if (!visible && this.isPlaying) {
+      this.stopAudio();
+    }
+  }
+  
+  /**
+   * Get current playing state
+   */
+  public getIsPlaying(): boolean {
+    return this.isPlaying;
+  }
+  
+  /**
+   * Get current audio file
+   */
+  public getCurrentAudioFile(): string | null {
+    return this.currentAudioFile;
+  }
+  
+  /**
+   * Replay current audio
+   */
+  public replayCurrentAudio(onComplete?: () => void): void {
+    if (this.currentAudioFile && this.lastPlayedStep) {
+      this.playStepAudio(this.lastPlayedStep, this.currentAudioFile, onComplete, true);
+    }
   }
 }
