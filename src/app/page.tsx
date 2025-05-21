@@ -18,7 +18,7 @@ export default function Home() {
       title: "Pediatric Medicine",
       icon: "/icons/pediatric.svg",
       description: "Specialized care for children and adolescents.",
-      href: "/services/pediatric"
+      href: "/services/pediatric-medicine"
     },
     {
       title: "Women's Health",
