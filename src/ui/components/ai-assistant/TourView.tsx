@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TourHighlight } from './TourHighlight';
+import { TourAudioService } from '@/services/TourAudioService';
+import { TourInteractionManager } from '@/services/TourInteractionManager';
 
 // Define a tour step
 interface TourStep {
@@ -29,6 +31,7 @@ export const TourView: React.FC<TourViewProps> = ({
   onStepChange,
 }) => {
   const [activeStep, setActiveStep] = useState(currentStepIndex);
+  const interactionManager = useRef(TourInteractionManager.getInstance());
 
   useEffect(() => {
     setActiveStep(currentStepIndex);
@@ -38,10 +41,22 @@ export const TourView: React.FC<TourViewProps> = ({
   const handleNext = () => {
     const nextStep = activeStep + 1;
     if (nextStep < steps.length) {
-      setActiveStep(nextStep);
-      if (onStepChange) {
-        onStepChange(nextStep);
-      }
+      const currentStepId = steps[activeStep]?.id || `step_${activeStep}`;
+      const nextStepId = steps[nextStep]?.id || `step_${nextStep}`;
+      
+      // Use the interaction manager to handle next step navigation
+      interactionManager.current.handleNextStep(
+        currentStepId,
+        nextStepId,
+        (index) => {
+          setActiveStep(index);
+          if (onStepChange) {
+            onStepChange(index);
+          }
+        },
+        nextStep,
+        steps
+      );
     } else {
       handleComplete();
     }
@@ -50,15 +65,31 @@ export const TourView: React.FC<TourViewProps> = ({
   const handlePrevious = () => {
     const prevStep = activeStep - 1;
     if (prevStep >= 0) {
-      setActiveStep(prevStep);
-      if (onStepChange) {
-        onStepChange(prevStep);
-      }
+      const currentStepId = steps[activeStep]?.id || `step_${activeStep}`;
+      
+      // Use the interaction manager to handle previous step navigation
+      interactionManager.current.handlePreviousStep(
+        currentStepId,
+        (index) => {
+          setActiveStep(index);
+          if (onStepChange) {
+            onStepChange(index);
+          }
+        },
+        prevStep,
+        steps
+      );
     }
   };
 
   const handleComplete = () => {
-    onComplete();
+    // Use the interaction manager to handle tour completion
+    interactionManager.current.handleTourComplete(onComplete);
+  };
+  
+  const handleClose = () => {
+    // Use the interaction manager to handle tour closing
+    interactionManager.current.handleCloseTour(onClose);
   };
 
   // Don't render if no steps
@@ -77,7 +108,7 @@ export const TourView: React.FC<TourViewProps> = ({
       position={currentStep.position || 'bottom'}
       onNext={handleNext}
       onPrevious={handlePrevious}
-      onClose={onClose}
+      onClose={handleClose}
       isLast={activeStep === steps.length - 1}
       isFirst={activeStep === 0}
     />

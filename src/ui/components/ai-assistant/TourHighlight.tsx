@@ -186,6 +186,8 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
             <button
               onClick={onClose}
               className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition mr-2"
+              aria-label="Exit Tour"
+              data-testid="exit-tour-button"
             >
               Exit Tour
             </button>

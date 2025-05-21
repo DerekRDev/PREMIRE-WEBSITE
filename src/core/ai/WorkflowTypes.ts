@@ -45,6 +45,7 @@ export interface AssistantState {
   uiState: "hidden" | "active" | "popup" | "calendar" | "celebration" | "form";
   lastNavigation?: string;
   formData?: Record<string, Record<string, any>>;
+  pendingWorkflowId?: string; // Used for starting a new workflow from an action
   voiceConfig?: {
     voiceId: string;
     enabled: boolean;

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { WorkflowEngine } from '@/core/ai/WorkflowEngine';
-import { AudioManager } from '@/core/ai/AudioManager';
+import { TourAudioService } from '@/services/TourAudioService';
 import { AIAssistantAnalytics } from '@/core/ai/AIAssistantAnalytics';
 import type { Workflow, WorkflowStep, AssistantState } from '@/core/ai/WorkflowTypes';
 
@@ -48,7 +48,7 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
 }) => {
   // Initialize services
   const [engine] = useState(() => new WorkflowEngine(workflows));
-  const [audioManager] = useState(() => new AudioManager(audioBasePath));
+  const [tourAudioService] = useState(() => TourAudioService.getInstance());
   const [analytics] = useState(() => AIAssistantAnalytics.getInstance());
 
   // State
@@ -77,12 +77,12 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
   // Shutdown the assistant
   const shutdown = useCallback(() => {
     setIsActive(false);
-    audioManager.stopAudio();
+    tourAudioService.stopAudio();
     analytics.trackEvent({
       type: 'assistant_close',
     });
     console.log("AI Assistant shutdown");
-  }, [audioManager, analytics]);
+  }, [tourAudioService, analytics]);
 
   // Start a workflow
   const startWorkflow = useCallback(
@@ -121,7 +121,7 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
           // Play audio if available
           if (result.step?.audioFile) {
             console.log('Playing audio:', result.step.audioFile);
-            audioManager.playAudio(result.step.audioFile, () => {
+            tourAudioService.playStepAudio(result.step.id, result.step.audioFile, () => {
               console.log('Audio completed');
               engine.audioCompleted();
               setState(engine.getState());
@@ -149,7 +149,7 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
         });
       }
     },
-    [engine, audioManager, analytics],
+    [engine, tourAudioService, analytics],
   );
 
   // Select a choice
@@ -182,7 +182,7 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
         // Play audio if available
         if (result.step?.audioFile) {
           console.log('Playing audio:', result.step.audioFile);
-          audioManager.playAudio(result.step.audioFile, () => {
+          tourAudioService.playStepAudio(result.step.id, result.step.audioFile, () => {
             engine.audioCompleted();
             setState(engine.getState());
           });
@@ -218,7 +218,7 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
         });
       }
     },
-    [engine, audioManager, analytics, state],
+    [engine, tourAudioService, analytics, state],
   );
 
   // Get available workflows
@@ -229,17 +229,17 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
   // Set mute state
   const setMute = useCallback(
     (muted: boolean) => {
-      audioManager.setMute(muted);
+      tourAudioService.setMute(muted);
     },
-    [audioManager],
+    [tourAudioService],
   );
 
   // Set volume
   const setVolume = useCallback(
     (volume: number) => {
-      audioManager.setVolume(volume);
+      tourAudioService.setVolume(volume);
     },
-    [audioManager],
+    [tourAudioService],
   );
 
   // Hide the assistant
@@ -256,9 +256,9 @@ export const AIAssistantProvider: React.FC<AIAssistantProviderProps> = ({
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      audioManager.stopAudio();
+      tourAudioService.stopAudio();
     };
-  }, [audioManager]);
+  }, [tourAudioService]);
 
   // Context value
   const contextValue: AIAssistantContextType = {

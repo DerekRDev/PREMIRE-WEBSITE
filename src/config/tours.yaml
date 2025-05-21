@@ -1,67 +1,81 @@
 # Premier Healthcare Platform Tours Configuration
-# This file defines all the tours available in the platform
+# This file defines UI element highlights for the tours defined in TypeScript workflows
+# This YAML config corresponds to src/core/ai/workflows/tours/quickTourWorkflow.ts
 
 tours:
-  # Quick Tour Guide - introduces the platform to new users
+  # Quick Tour UI Highlights - coordinates with quickTourWorkflow.ts
   quick_tour:
     id: quick_tour
-    name: Quick Tour Guide
-    description: A quick tour of the Premier Healthcare Platform
-    initialStep: tour_intro
+    name: "Quick Tour"
+    description: "A guided tour of the platform's key features"
+    initialStep: navigation_overview
     steps:
-      - id: navbar
+      - id: navigation_overview
         title: Navigation
         description: Use the navigation bar to move between different sections of the application. You can access appointments, patient intake, your profile, and more.
         selector: "nav#navbar"
         position: bottom
         audioFile: welcome/navigation-intro.mp3
       
-      - id: appointments
+      - id: appointments_overview
         title: Appointment Scheduling
         description: Let's start with appointments. Our platform makes it easy to schedule, reschedule, or cancel appointments.
         selector: "a[href='/appointments']"
         position: bottom
         audioFile: appointment/appointment_scheduling.mp3
       
-      - id: patient_intake
+      - id: intake_overview
         title: Patient Intake
         description: To save time at the clinic, please complete your registration and medical history online before your appointment so we can streamline our services for you.
         selector: "a[href*='/intake']"
         position: bottom
         audioFile: patient-intake/patient_intake_button.mp3
       
-      - id: my_profile
+      - id: profile_overview
         title: My Profile
         description: View and update your personal information, contact details, and preferences in your profile section.
         selector: "a[href*='/patient']"
         position: bottom
         audioFile: my-profile/my-profile-section.mp3
       
-      - id: referrals
+      - id: referrals_overview
         title: Referrals
         description: Track and manage your referrals to specialists. Stay informed at every step of the referral process.
         selector: "a[href='/referrals']"
         position: bottom
         audioFile: referrals/referrals_button.mp3
-      - id: billing
+      
+      - id: billing_overview
         title: Billing & Insurance
         description: In the billing and insurance section, you can manage insurance information, view statements, and make secure payments. All financial and health data is protected in compliance with HIPAA standards and robust security protocols.
         selector: "#billing-menu button"
         position: top
         audioFile: payment/billing_and_insurance_nav.mp3
       
-      - id: help
+      - id: help_overview
         title: Need Help?
         description: Click this button anytime you need assistance with the platform. Our AI assistant will guide you through any process.
         selector: "a.need-help-button"
         position: left
         audioFile: need-help/need_help_button.mp3
+      
       - id: tour_complete
         title: Tour Complete!
         description: "Congratulations! You've completed the quick tour of Premier Healthcare. Feel free to explore the platform on your own."
         audioFile: welcome/tour_complete.mp3
 
-  # Add more tours below as needed
-  # Example: patient_intake_tour:
-  #   name: Patient Intake Guide
-  #   ...
+  # When adding new tours, make sure to:
+  # 1. Create a corresponding TypeScript workflow file in src/core/ai/workflows/tours/
+  # 2. Define the conversation flow and choices in TypeScript
+  # 3. Define the UI highlighting elements here in YAML
+  # 4. Ensure the step IDs match between the two implementations
+  #
+  # Example for a new tour:
+  # patient_intake_tour:  # Should match the id in patientIntakeTourWorkflow.ts
+  #   id: patient_intake_tour
+  #   name: "Patient Intake Guide"
+  #   description: "Learn how to complete patient intake forms"
+  #   initialStep: first_step_id
+  #   steps:
+  #     - id: first_step_id
+  #       ...
