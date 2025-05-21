@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export const Header: React.FC = () => {
@@ -45,27 +46,34 @@ export const Header: React.FC = () => {
   }, [dropdownRef]);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-blue-600 font-bold text-xl">
-                Premier Healthcare
-              </Link>
-            </div>
+        <div className="flex justify-between items-center h-24">
+          <div className="flex-shrink-0">
+            <Link href="/" className="block">
+              <div className="relative h-20 w-80 sm:w-96">
+                <Image 
+                  src="/images/premier-logo-final-refinements.svg" 
+                  alt="Premier Healthcare Logo" 
+                  fill
+                  className="object-contain"
+                  priority
+                  style={{ objectPosition: 'left center' }}
+                />
+              </div>
+            </Link>
           </div>
           
           {/* Desktop Navigation */}
-          <nav id="navbar" className="hidden md:flex space-x-6 items-center">
+          <nav id="navbar" className="hidden md:flex space-x-4 items-center ml-auto">
             {navigationLinks.map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
                   pathname === link.href
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
                 } ${link.href === '/appointments' ? 'appointment-section' : ''} ${link.href === '/intake' ? 'patient-intake-section' : ''}`}
               >
                 {link.label}
@@ -78,8 +86,8 @@ export const Header: React.FC = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1 ${
                   patientMenuItems.some(item => pathname === item.href)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
                 }`}
               >
                 <span>Billing & Insurance</span>
@@ -97,8 +105,8 @@ export const Header: React.FC = () => {
                       href={item.href}
                       className={`block px-4 py-2 text-sm ${
                         pathname === item.href
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                          ? 'bg-primary-50 text-primary-700'
+                          : 'text-neutral-700 hover:bg-primary-50 hover:text-primary-700'
                       }`}
                       onClick={() => setIsDropdownOpen(false)}
                     >
@@ -111,17 +119,17 @@ export const Header: React.FC = () => {
             
             <Link
               href="/help"
-              className="need-help-button ml-4 px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              className="need-help-button ml-4 px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors"
             >
               Need Help?
             </Link>
           </nav>
           
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+              className="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-primary-600 hover:bg-primary-50"
               aria-expanded={isMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
@@ -149,8 +157,8 @@ export const Header: React.FC = () => {
               href={link.href}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 pathname === link.href
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -164,8 +172,8 @@ export const Header: React.FC = () => {
               onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
               className={`w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center justify-between ${
                 patientMenuItems.some(item => pathname === item.href)
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-neutral-600 hover:text-primary-600 hover:bg-primary-50'
               }`}
             >
               <span>Billing & Insurance</span>
@@ -183,8 +191,8 @@ export const Header: React.FC = () => {
                     href={item.href}
                     className={`block px-3 py-2 rounded-md text-sm font-medium ${
                       pathname === item.href
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-neutral-700 hover:bg-primary-50 hover:text-primary-700'
                     }`}
                     onClick={() => {
                       setIsMobileDropdownOpen(false);
@@ -200,7 +208,7 @@ export const Header: React.FC = () => {
           
           <Link
             href="/help"
-            className="need-help-button block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700"
+            className="need-help-button block px-3 py-2 rounded-md text-base font-medium bg-primary-600 text-white hover:bg-primary-700 mt-3"
             onClick={() => setIsMenuOpen(false)}
           >
             Need Help?

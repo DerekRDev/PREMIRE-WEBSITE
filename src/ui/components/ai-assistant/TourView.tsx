@@ -35,7 +35,30 @@ export const TourView: React.FC<TourViewProps> = ({
 
   useEffect(() => {
     setActiveStep(currentStepIndex);
+    
+    // Ensure mobile menu is open when tour initializes or step changes
+    setTimeout(() => {
+      ensureMobileMenuOpen();
+    }, 100);
   }, [currentStepIndex]);
+
+  // Helper function to ensure mobile menu stays open during tour
+  const ensureMobileMenuOpen = () => {
+    const isMobileView = window.innerWidth < 768; // Matches the Tailwind md: breakpoint
+    if (isMobileView) {
+      // Check if mobile menu is closed (by looking for hidden class)
+      const mobileMenu = document.querySelector('.md\\:hidden .px-2.pt-2.pb-3');
+      const isMenuHidden = mobileMenu?.classList.contains('hidden');
+      
+      if (isMenuHidden) {
+        // Find and click the menu toggle button to open it
+        const menuButton = document.querySelector('.md\\:hidden button');
+        if (menuButton && menuButton instanceof HTMLElement) {
+          menuButton.click();
+        }
+      }
+    }
+  };
 
   // Handle navigation between steps
   const handleNext = () => {
@@ -53,6 +76,11 @@ export const TourView: React.FC<TourViewProps> = ({
           if (onStepChange) {
             onStepChange(index);
           }
+          
+          // Ensure mobile menu is open if needed for the next step
+          setTimeout(() => {
+            ensureMobileMenuOpen();
+          }, 100);
         },
         nextStep,
         steps
@@ -75,6 +103,11 @@ export const TourView: React.FC<TourViewProps> = ({
           if (onStepChange) {
             onStepChange(index);
           }
+          
+          // Ensure mobile menu is open if needed for the previous step
+          setTimeout(() => {
+            ensureMobileMenuOpen();
+          }, 100);
         },
         prevStep,
         steps

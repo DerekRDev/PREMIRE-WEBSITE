@@ -44,6 +44,41 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
         element = document.querySelector(selector);
       }
       
+      // Check if we need to open the mobile menu
+      const isMobileView = window.innerWidth < 768; // Matches the Tailwind md: breakpoint
+      if (isMobileView) {
+        // Check if the element is hidden in the mobile menu when collapsed
+        // Look specifically for elements that should be in the navigation
+        const isMobileNavItem = selector?.includes('navbar') || 
+          selector?.includes('need-help-button') || 
+          selector?.includes('billing-menu') || 
+          selector?.includes('href=');
+        
+        // If element is not visible and should be in the nav menu on mobile
+        if (isMobileNavItem && (!element || element.getBoundingClientRect().height === 0)) {
+          console.log('Opening mobile menu to show tour element');
+          // Find and click the menu toggle button
+          const menuButton = document.querySelector('.md\\:hidden button');
+          if (menuButton && menuButton instanceof HTMLElement) {
+            menuButton.click();
+            // Re-query the element after opening the menu
+            setTimeout(() => {
+              if (elementId) {
+                element = document.getElementById(elementId);
+              } else if (selector) {
+                element = document.querySelector(selector);
+              }
+              
+              if (element) {
+                setTargetElement(element);
+                const rect = element.getBoundingClientRect();
+                setTargetRect(rect);
+              }
+            }, 300); // Wait for menu animation
+          }
+        }
+      }
+      
       if (element) {
         setTargetElement(element);
         const rect = element.getBoundingClientRect();
@@ -59,6 +94,9 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
     const handleResize = () => {
       if (targetElement) {
         setTargetRect(targetElement.getBoundingClientRect());
+      } else {
+        // If target becomes null (like when switching to mobile view), try to find it again
+        findTargetElement();
       }
     };
     
