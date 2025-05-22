@@ -150,3 +150,59 @@ export function toUIProvider(provider: Provider): UIProvider {
     languages: provider.languages
   };
 }
+
+// Simple provider interface for compatibility with AppointmentScheduler
+export interface SimpleProvider {
+  id: string;
+  firstName: string;
+  lastName: string;
+  title: string;
+  specialties: string[];
+  profileImage?: string;
+  rating?: number;
+  availabilityStatus?: string;
+  nextAvailable?: string;
+  bio?: string;
+  education?: string[];
+  languages?: string[];
+  yearsOfExperience?: number;
+  acceptingNewPatients?: boolean;
+  locations: {
+    id: string;
+    name: string;
+    address: string;
+    distance?: number;
+  }[];
+}
+
+// Helper function to convert SimpleProvider to UIProvider
+export function simpleProviderToUIProvider(provider: SimpleProvider): UIProvider {
+  return {
+    id: provider.id,
+    name: `${provider.firstName} ${provider.lastName}`,
+    specialties: provider.specialties.map(s => ({ id: s, name: s, description: '' })),
+    locations: provider.locations.map(l => ({
+      id: l.id,
+      name: l.name,
+      address: l.address,
+      city: '',
+      state: '',
+      zipCode: '',
+      phone: ''
+    })),
+    schedule: {
+      workingHours: [{
+        dayOfWeek: 1,
+        startTime: '09:00',
+        endTime: '17:00'
+      }],
+      blockedTimes: []
+    },
+    email: '',
+    phone: '',
+    imageUrl: provider.profileImage,
+    biography: provider.bio,
+    education: provider.education,
+    languages: provider.languages
+  };
+}

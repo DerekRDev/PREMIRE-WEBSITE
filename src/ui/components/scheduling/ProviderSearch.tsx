@@ -1,82 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Provider, Specialty } from '../../../core/entities/Provider';
-import { ProviderSearchProps, UIProvider } from './types';
+import { SimpleProvider } from './types';
 import { Card } from '../../design-system/components/Card';
 import { Input } from '../../design-system/components/Input';
 import { Select } from '../../design-system/components/Select';
-
-// Simple provider interface for compatibility with AppointmentScheduler
-interface SimpleProvider {
-  id: string;
-  firstName: string;
-  lastName: string;
-  title: string;
-  specialties: string[];
-  profileImage?: string;
-  rating?: number;
-  availabilityStatus?: string;
-  nextAvailable?: string;
-  bio?: string;
-  education?: string[];
-  languages?: string[];
-  yearsOfExperience?: number;
-  acceptingNewPatients?: boolean;
-  locations: {
-    id: string;
-    name: string;
-    address: string;
-    distance?: number;
-  }[];
-}
-
-// Helper function to convert domain Provider to UIProvider
-function toUIProvider(provider: Provider): UIProvider {
-  return {
-    id: provider.id,
-    name: provider.name,
-    specialties: provider.specialties,
-    locations: provider.locations,
-    schedule: provider.getSchedule(), // Convert private schedule to public UI version
-    email: provider.email,
-    phone: provider.phone,
-    imageUrl: provider.imageUrl,
-    biography: provider.biography,
-    education: provider.education,
-    languages: provider.languages
-  };
-}
-
-// Helper function to convert SimpleProvider to UIProvider
-function simpleProviderToUIProvider(provider: SimpleProvider): UIProvider {
-  return {
-    id: provider.id,
-    name: `${provider.firstName} ${provider.lastName}`,
-    specialties: provider.specialties.map(s => ({ id: s, name: s, description: '' })),
-    locations: provider.locations.map(l => ({
-      id: l.id,
-      name: l.name,
-      address: l.address,
-      city: '',
-      state: '',
-      zipCode: '',
-      phone: ''
-    })),
-    schedule: {
-      workingHours: [{
-        dayOfWeek: 1,
-        startTime: '09:00',
-        endTime: '17:00'
-      }],
-      blockedTimes: []
-    },
-    email: '',
-    phone: '',
-    imageUrl: provider.profileImage,
-    biography: provider.bio,
-    education: provider.education,
-    languages: provider.languages
-  };
-}
 
 export function ProviderSearch({
   providers,

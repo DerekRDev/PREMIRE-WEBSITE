@@ -306,34 +306,6 @@ const mockProviders: Provider[] = [
       }
     ]
   },
-  {
-    id: 'dr-kim',
-    firstName: 'David',
-    lastName: 'Kim',
-    title: 'MD, Pediatrician',
-    specialties: ['pediatrics'],
-    profileImage: '/images/dr-kim.png',
-    bio: 'Dr. Kim is passionate about child health and development. He takes a family-centered approach to pediatric care and has expertise in behavioral health and developmental disorders.',
-    education: [
-      'MD from Northwestern University',
-      'Pediatric Residency at Boston Children\'s Hospital',
-      'Fellowship in Developmental Pediatrics'
-    ],
-    languages: ['English', 'Korean'],
-    yearsOfExperience: 11,
-    acceptingNewPatients: true,
-    rating: 4.8,
-    availabilityStatus: 'available-week',
-    nextAvailable: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    locations: [
-      {
-        id: 'peds-clinic',
-        name: 'Kids First Pediatrics',
-        address: '456 Birch Ln, Anytown, USA',
-        distance: 2.1
-      }
-    ]
-  }
 ];
 
 export default function AppointmentsPage() {
@@ -424,7 +396,7 @@ export default function AppointmentsPage() {
       {/* Debug info */}
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed top-4 left-4 bg-black text-white p-2 text-xs z-50">
-          State: {state.uiState} | Workflow: {state.currentWorkflowId} | Step: {state.currentStepIndex}
+          State: {state.uiState} | Workflow: {state.currentWorkflowId} | Step: {state.currentStepId}
         </div>
       )}
 

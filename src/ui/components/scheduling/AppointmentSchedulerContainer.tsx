@@ -11,7 +11,7 @@ import { AppointmentConfirmation } from './AppointmentConfirmation';
 import { AppointmentDetailsForm } from './AppointmentDetailsForm';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
-import { AppointmentSchedulerContainerProps, UIProvider, UIAppointment, toUIProvider } from './types';
+import { AppointmentSchedulerContainerProps, UIProvider, UIAppointment, toUIProvider, simpleProviderToUIProvider } from './types';
 
 enum SchedulingStep {
   SPECIALTY = 0,
@@ -178,9 +178,23 @@ export function AppointmentSchedulerContainer({
       case SchedulingStep.PROVIDER:
         return (
           <ProviderSearch
-            specialty={state.selectedSpecialty}
-            selectedProvider={state.selectedProvider}
-            onSelectProvider={handleProviderSelect}
+            providers={[]} // TODO: Pass actual providers when available
+            specialtyId={state.selectedSpecialty?.id}
+            selectedProvider={state.selectedProvider ? {
+              id: state.selectedProvider.id,
+              firstName: state.selectedProvider.name.split(' ')[0],
+              lastName: state.selectedProvider.name.split(' ')[1] || '',
+              title: state.selectedProvider.specialties[0]?.name || '',
+              specialties: state.selectedProvider.specialties.map(s => s.id),
+              profileImage: state.selectedProvider.imageUrl,
+              locations: state.selectedProvider.locations,
+              bio: state.selectedProvider.biography,
+              education: state.selectedProvider.education,
+              languages: state.selectedProvider.languages
+            } : undefined}
+            onSelectProvider={(provider) => {
+              handleProviderSelect(simpleProviderToUIProvider(provider));
+            }}
           />
         );
 
