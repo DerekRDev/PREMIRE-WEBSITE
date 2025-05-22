@@ -22,6 +22,7 @@ interface TourViewProps {
   steps: TourStep[];
   currentStepIndex?: number;
   onStepChange?: (index: number) => void;
+  tourType?: string;
 }
 
 export const TourView: React.FC<TourViewProps> = ({
@@ -30,6 +31,7 @@ export const TourView: React.FC<TourViewProps> = ({
   steps,
   currentStepIndex = 0,
   onStepChange,
+  tourType,
 }) => {
   const [activeStep, setActiveStep] = useState(currentStepIndex);
   const interactionManager = useRef(TourInteractionManager.getInstance());
@@ -158,6 +160,7 @@ export const TourView: React.FC<TourViewProps> = ({
       onClose={handleClose}
       isLast={activeStep === steps.length - 1}
       isFirst={activeStep === 0}
+      tourType={tourType}
     />
   );
 };

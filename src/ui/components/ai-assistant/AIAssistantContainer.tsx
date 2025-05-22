@@ -20,8 +20,9 @@ export const AIAssistantContainer: React.FC = () => {
   // Get the AI Assistant context
   const { state, currentStep, selectChoice, hideAssistant } = useAIAssistant();
   
-  // Load tour configuration
-  const { tourSteps } = useTourConfigProvider('quick_tour');
+  // Load tour configuration based on current workflow
+  const currentTourId = state.currentWorkflowId === 'appointment_booking_tour' ? 'appointment_booking_tour' : 'quick_tour';
+  const { tourSteps } = useTourConfigProvider(currentTourId);
   
   // Initialize tour audio service
   const tourAudioService = TourAudioService.getInstance();
@@ -60,10 +61,13 @@ export const AIAssistantContainer: React.FC = () => {
   
   console.log('AIAssistantContainer: rendering content with displayType:', currentStep.displayType);
 
+  // Check if this is the appointment booking tour (non-blocking)
+  const isAppointmentBookingTour = state.currentWorkflowId === 'appointment_booking_tour';
+  
   return (
     <>
-      {/* Regular assistant UI */}
-      {!tourState.isActive && !tourState.showTourComplete && (
+      {/* Regular assistant UI - only show blocking overlay for non-appointment tours */}
+      {!tourState.isActive && !tourState.showTourComplete && !isAppointmentBookingTour && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="max-w-md w-full mx-4">
             {/* Render appropriate view based on current step */}
@@ -78,6 +82,25 @@ export const AIAssistantContainer: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Appointment booking tour - non-blocking popup positioned to side */}
+      {!tourState.isActive && !tourState.showTourComplete && isAppointmentBookingTour && (
+        <div className="fixed inset-0 pointer-events-none z-[9999]">
+          <div className="absolute top-1/2 right-8 transform -translate-y-1/2 pointer-events-auto">
+            <div className="max-w-sm w-full">
+              {/* Render appropriate view based on current step */}
+              <ViewRenderer 
+                currentStep={currentStep} 
+                onChoiceSelected={selectChoice} 
+                onClose={hideAssistant} 
+              />
+              
+              {/* Debug controls */}
+              <DebugPanel state={state} currentStep={currentStep} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tour highlighting UI */}
       {tourState.isActive && (
@@ -87,6 +110,7 @@ export const AIAssistantContainer: React.FC = () => {
           onStepChange={handleTourStepChange}
           onClose={handleCloseTour}
           onComplete={handleTourCompleteAction}
+          tourType={currentTourId}
         />
       )}
       

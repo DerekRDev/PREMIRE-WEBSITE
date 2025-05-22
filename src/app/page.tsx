@@ -3,9 +3,23 @@
 import { Button, Card } from '@/ui/design-system/components';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useAIAssistant } from '@/ui/providers/ai-assistant/AIAssistantProvider';
 
 export default function Home() {
   const router = useRouter();
+  
+  // AI Assistant for tour functionality
+  const { initialize, startWorkflow } = useAIAssistant();
+  
+  const handleStartTourAndNavigate = () => {
+    // Navigate to appointments page first
+    router.push('/appointments');
+    // Small delay to ensure page navigation, then start tour
+    setTimeout(() => {
+      initialize();
+      startWorkflow('appointment_booking_tour');
+    }, 500);
+  };
   
   const serviceCategories = [
     {
@@ -60,14 +74,31 @@ export default function Home() {
                 Schedule appointments, complete intake forms, and manage referrals all in one place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  variant="secondary" 
-                  size="large"
-                  onClick={() => router.push('/appointments')}
-                  className="w-full sm:w-auto"
-                >
-                  Schedule Now
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <Button 
+                    variant="secondary" 
+                    size="large"
+                    onClick={() => router.push('/appointments')}
+                    className="w-full sm:w-auto"
+                  >
+                    Schedule Now
+                  </Button>
+                  <button
+                    onClick={handleStartTourAndNavigate}
+                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-50 rounded-md px-3 py-2 text-sm font-medium transition-all duration-300 relative group"
+                    aria-label="Take appointment booking tour"
+                  >
+                    <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                      Take Guided Tour
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </button>
+                </div>
                 <Button 
                   variant="outline" 
                   size="large"
@@ -166,7 +197,7 @@ export default function Home() {
                   Find the perfect appointment time with your preferred provider. Our
                   scheduling system makes it easy to find and book appointments.
                 </p>
-                <div className="flex justify-center mt-auto">
+                <div className="flex justify-center items-center gap-2 mt-auto">
                   <Button 
                     variant="primary" 
                     onClick={() => router.push('/appointments')}
@@ -178,6 +209,21 @@ export default function Home() {
                   >
                     Schedule Now
                   </Button>
+                  <button
+                    onClick={handleStartTourAndNavigate}
+                    className="bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-md px-3 py-2 transition-all duration-300 relative group"
+                    aria-label="Take appointment booking tour"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                      Take Guided Tour
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </button>
                 </div>
               </Card>
 
@@ -321,14 +367,31 @@ export default function Home() {
               Join thousands of patients who trust Premier Healthcare for their medical needs.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button 
-                variant="primary" 
-                size="large"
-                onClick={() => router.push('/appointments')}
-                className="w-full sm:w-auto"
-              >
-                Schedule an Appointment
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Button 
+                  variant="primary" 
+                  size="large"
+                  onClick={() => router.push('/appointments')}
+                  className="w-full sm:w-auto"
+                >
+                  Schedule an Appointment
+                </Button>
+                <button
+                  onClick={handleStartTourAndNavigate}
+                  className="bg-primary-100 hover:bg-primary-200 text-primary-700 border border-primary-300 rounded-md px-3 py-2 text-sm font-medium transition-all duration-300 relative group"
+                  aria-label="Take appointment booking tour"
+                >
+                  <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    Take Guided Tour
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </button>
+              </div>
               <Button 
                 variant="outline" 
                 size="large"

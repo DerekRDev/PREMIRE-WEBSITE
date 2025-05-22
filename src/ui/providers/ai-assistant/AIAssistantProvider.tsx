@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { WorkflowEngine } from '@/core/ai/WorkflowEngine';
+import { WorkflowEngine } from '@/core/ai';
 import { TourAudioService } from '@/services/TourAudioService';
 import { AIAssistantAnalytics } from '@/core/ai/AIAssistantAnalytics';
 import type { Workflow, WorkflowStep, AssistantState } from '@/core/ai/WorkflowTypes';

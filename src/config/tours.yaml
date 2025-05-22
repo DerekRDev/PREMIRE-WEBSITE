@@ -49,33 +49,45 @@ tours:
         title: Billing & Insurance
         description: In the billing and insurance section, you can manage insurance information, view statements, and make secure payments. All financial and health data is protected in compliance with HIPAA standards and robust security protocols.
         selector: "#billing-menu button"
-        position: top
+        position: bottom
         audioFile: payment/billing_and_insurance_nav.mp3
       
       - id: help_overview
         title: Need Help?
         description: Click this button anytime you need assistance with the platform. Our AI assistant will guide you through any process.
-        selector: "a.need-help-button"
-        position: left
+        selector: "button[aria-label='Open AI Assistant']"
+        position: right
         audioFile: need-help/need_help_button.mp3
       
       - id: tour_complete
         title: Tour Complete!
         description: "Congratulations! You've completed the quick tour of Premier Healthcare. Feel free to explore the platform on your own."
+        selector: "button[aria-label='Open AI Assistant']"
+        position: center
         audioFile: welcome/tour_complete.mp3
+
+  # Appointment Booking Tour - coordinates with appointmentBookingWorkflow.ts
+  appointment_booking_tour:
+    id: appointment_booking_tour
+    name: "Appointment Booking Tour"
+    description: "A step-by-step guide through booking your first appointment"
+    initialStep: tour_intro
+    audioFiles:
+      tour_intro: appointment-booking/step1_intro.mp3
+      specialty_overview: appointment-booking/step2_specialty_overview.mp3
+      specialty_selection: appointment-booking/step3_select_specialty.mp3
+      specialty_selected: appointment-booking/step4_specialty_selected.mp3
+      provider_search_intro: appointment-booking/step5_provide_search_intro.mp3
+      provider_cards_overview: appointment-booking/step6_provider_cards.mp3
+      provider_selection: appointment-booking/step7_select_provider.mp3
+      date_selection: appointment-booking/step8_date_selection.mp3
+      time_selection: appointment-booking/step9_time_selection.mp3
+      appointment_details: appointment-booking/step10_appointment_details.mp3
+      visit_reason: appointment-booking/step11_visit_reason.mp3
+      appointment_confirmed: appointment-booking/step12_confirmation.mp3
 
   # When adding new tours, make sure to:
   # 1. Create a corresponding TypeScript workflow file in src/core/ai/workflows/tours/
   # 2. Define the conversation flow and choices in TypeScript
   # 3. Define the UI highlighting elements here in YAML
   # 4. Ensure the step IDs match between the two implementations
-  #
-  # Example for a new tour:
-  # patient_intake_tour:  # Should match the id in patientIntakeTourWorkflow.ts
-  #   id: patient_intake_tour
-  #   name: "Patient Intake Guide"
-  #   description: "Learn how to complete patient intake forms"
-  #   initialStep: first_step_id
-  #   steps:
-  #     - id: first_step_id
-  #       ...

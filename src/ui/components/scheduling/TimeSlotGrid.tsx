@@ -1,18 +1,10 @@
 import React from 'react';
-
-interface TimeSlot {
-  startTime: string; // ISO format date-time
-  endTime: string;   // ISO format date-time
-  providerId: string;
-  providerName: string;
-  locationId: string;
-  locationName: string;
-}
+import { UITimeSlot } from './DateTimeSelection';
 
 export interface TimeSlotGridProps {
-  timeSlots: TimeSlot[];
-  selectedSlot?: TimeSlot;
-  onSelectSlot: (slot: TimeSlot) => void;
+  timeSlots: UITimeSlot[];
+  selectedSlot?: UITimeSlot;
+  onSelectSlot: (slot: UITimeSlot) => void;
   className?: string;
 }
 
@@ -24,9 +16,9 @@ export const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
 }) => {
   // Group time slots by time of day: morning, afternoon, evening
   const groupedSlots = React.useMemo(() => {
-    const morning: TimeSlot[] = [];
-    const afternoon: TimeSlot[] = [];
-    const evening: TimeSlot[] = [];
+    const morning: UITimeSlot[] = [];
+    const afternoon: UITimeSlot[] = [];
+    const evening: UITimeSlot[] = [];
     
     timeSlots.forEach(slot => {
       const hours = new Date(slot.startTime).getHours();
@@ -50,13 +42,13 @@ export const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
   };
   
   // Check if a slot is selected
-  const isSelected = (slot: TimeSlot): boolean => {
+  const isSelected = (slot: UITimeSlot): boolean => {
     return selectedSlot?.startTime === slot.startTime && 
            selectedSlot?.providerId === slot.providerId;
   };
   
   // Render a time of day section with its slots
-  const renderTimeOfDaySection = (title: string, slots: TimeSlot[]) => {
+  const renderTimeOfDaySection = (title: string, slots: UITimeSlot[]) => {
     if (slots.length === 0) return null;
     
     return (

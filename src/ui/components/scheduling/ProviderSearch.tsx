@@ -1,219 +1,243 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
+import { Provider, Specialty } from '../../../core/entities/Provider';
+import { ProviderSearchProps, UIProvider } from './types';
+import { Card } from '../../design-system/components/Card';
 import { Input } from '../../design-system/components/Input';
 import { Select } from '../../design-system/components/Select';
-import { Button } from '../../design-system/components/Button';
-import { ProviderCard } from './ProviderCard';
 
-interface Location {
-  id: string;
-  name: string;
-  address: string;
-}
-
-interface Provider {
+// Simple provider interface for compatibility with AppointmentScheduler
+interface SimpleProvider {
   id: string;
   firstName: string;
   lastName: string;
   title: string;
   specialties: string[];
   profileImage?: string;
-  locations: Location[];
+  rating?: number;
+  availabilityStatus?: string;
+  nextAvailable?: string;
   bio?: string;
   education?: string[];
   languages?: string[];
   yearsOfExperience?: number;
   acceptingNewPatients?: boolean;
+  locations: {
+    id: string;
+    name: string;
+    address: string;
+    distance?: number;
+  }[];
 }
 
-export interface ProviderSearchProps {
-  providers: Provider[];
-  specialtyId?: string;
-  onSelectProvider: (provider: Provider) => void;
-  selectedProvider?: Provider;
-  className?: string;
+// Helper function to convert domain Provider to UIProvider
+function toUIProvider(provider: Provider): UIProvider {
+  return {
+    id: provider.id,
+    name: provider.name,
+    specialties: provider.specialties,
+    locations: provider.locations,
+    schedule: provider.getSchedule(), // Convert private schedule to public UI version
+    email: provider.email,
+    phone: provider.phone,
+    imageUrl: provider.imageUrl,
+    biography: provider.biography,
+    education: provider.education,
+    languages: provider.languages
+  };
 }
 
-export const ProviderSearch: React.FC<ProviderSearchProps> = ({
+// Helper function to convert SimpleProvider to UIProvider
+function simpleProviderToUIProvider(provider: SimpleProvider): UIProvider {
+  return {
+    id: provider.id,
+    name: `${provider.firstName} ${provider.lastName}`,
+    specialties: provider.specialties.map(s => ({ id: s, name: s, description: '' })),
+    locations: provider.locations.map(l => ({
+      id: l.id,
+      name: l.name,
+      address: l.address,
+      city: '',
+      state: '',
+      zipCode: '',
+      phone: ''
+    })),
+    schedule: {
+      workingHours: [{
+        dayOfWeek: 1,
+        startTime: '09:00',
+        endTime: '17:00'
+      }],
+      blockedTimes: []
+    },
+    email: '',
+    phone: '',
+    imageUrl: provider.profileImage,
+    biography: provider.bio,
+    education: provider.education,
+    languages: provider.languages
+  };
+}
+
+export function ProviderSearch({
   providers,
   specialtyId,
-  onSelectProvider,
   selectedProvider,
-  className = '',
-}) => {
+  onSelectProvider,
+  className = ''
+}: {
+  providers: SimpleProvider[];
+  specialtyId?: string;
+  selectedProvider?: SimpleProvider;
+  onSelectProvider: (provider: SimpleProvider) => void;
+  className?: string;
+}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
-  const [filteredProviders, setFilteredProviders] = useState<Provider[]>(providers);
 
-  // Create a list of unique locations from all providers
-  const locations: Location[] = React.useMemo(() => {
-    const uniqueLocations = new Map<string, Location>();
-    
-    providers.forEach(provider => {
+  // Filter providers by specialty if specified
+  const filteredBySpecialty = useMemo(() => {
+    if (!specialtyId) return providers;
+    return providers.filter(provider => 
+      provider.specialties.includes(specialtyId)
+    );
+  }, [providers, specialtyId]);
+
+  const filteredProviders = useMemo(() => {
+    return filteredBySpecialty.filter(provider => {
+      const fullName = `${provider.firstName} ${provider.lastName}`;
+      const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesLocation = !selectedLocation || provider.locations.some(l => l.id === selectedLocation);
+      return matchesSearch && matchesLocation;
+    });
+  }, [filteredBySpecialty, searchTerm, selectedLocation]);
+
+  // Get unique locations from all providers
+  const locations = useMemo(() => {
+    const uniqueLocations = new Set<string>();
+    filteredBySpecialty.forEach(provider => {
       provider.locations.forEach(location => {
-        if (!uniqueLocations.has(location.id)) {
-          uniqueLocations.set(location.id, location);
-        }
+        uniqueLocations.add(location.id);
       });
     });
-    
-    return Array.from(uniqueLocations.values());
-  }, [providers]);
-
-  // Filter providers based on search term, specialty, and location
-  useEffect(() => {
-    let filtered = [...providers];
-    
-    if (specialtyId) {
-      filtered = filtered.filter(provider => 
-        provider.specialties.includes(specialtyId)
-      );
-    }
-    
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(provider => 
-        `${provider.firstName} ${provider.lastName}`.toLowerCase().includes(term) ||
-        provider.title.toLowerCase().includes(term)
-      );
-    }
-    
-    if (selectedLocation) {
-      filtered = filtered.filter(provider =>
-        provider.locations.some(location => location.id === selectedLocation)
-      );
-    }
-    
-    setFilteredProviders(filtered);
-  }, [providers, searchTerm, specialtyId, selectedLocation]);
-
-  const handlePrint = () => {
-    if (selectedProvider) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Provider Details - ${selectedProvider.firstName} ${selectedProvider.lastName}</title>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
-                h1 { color: #1e40af; margin-bottom: 1rem; }
-                h2 { color: #1e40af; margin-top: 1.5rem; }
-                .section { margin-bottom: 1.5rem; }
-                .label { font-weight: bold; color: #4b5563; }
-                ul { padding-left: 1.5rem; }
-                li { margin-bottom: 0.5rem; }
-              </style>
-            </head>
-            <body>
-              <h1>${selectedProvider.firstName} ${selectedProvider.lastName}</h1>
-              <div class="section">
-                <p class="label">Title:</p>
-                <p>${selectedProvider.title}</p>
-              </div>
-              ${selectedProvider.bio ? `
-                <div class="section">
-                  <h2>About</h2>
-                  <p>${selectedProvider.bio}</p>
-                </div>
-              ` : ''}
-              ${selectedProvider.education ? `
-                <div class="section">
-                  <h2>Education</h2>
-                  <ul>
-                    ${selectedProvider.education.map(edu => `<li>${edu}</li>`).join('')}
-                  </ul>
-                </div>
-              ` : ''}
-              ${selectedProvider.languages ? `
-                <div class="section">
-                  <h2>Languages</h2>
-                  <p>${selectedProvider.languages.join(', ')}</p>
-                </div>
-              ` : ''}
-              <div class="section">
-                <h2>Locations</h2>
-                <ul>
-                  ${selectedProvider.locations.map(loc => `
-                    <li>
-                      <p><strong>${loc.name}</strong></p>
-                      <p>${loc.address}</p>
-                    </li>
-                  `).join('')}
-                </ul>
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
-  };
+    return Array.from(uniqueLocations).map(id => {
+      const location = filteredBySpecialty.flatMap(p => p.locations).find(l => l.id === id)!;
+      return { value: id, label: location.name };
+    });
+  }, [filteredBySpecialty]);
 
   return (
-    <div className={`space-y-8 ${className}`}>
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Choose Your Provider
-        </h2>
-        <p className="text-gray-600">
-          Select a healthcare provider that best meets your needs.
-        </p>
-      </div>
-      
-      <div className="flex gap-4 items-center justify-between">
-        <div className="flex gap-4 flex-1">
-          <Input
-            placeholder="Search by name or title"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-xs"
-          />
-          
-          <Select
-            placeholder="Filter by location"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="max-w-xs"
-          >
-            <option value="">All locations</option>
-            {locations.map(location => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        {selectedProvider && (
-          <Button
-            onClick={handlePrint}
-            variant="outline"
-            className="whitespace-nowrap"
-          >
-            Print Details
-          </Button>
-        )}
-      </div>
-      
-      {filteredProviders.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600 text-lg">
-            No providers found that match your criteria.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredProviders.map(provider => (
-            <ProviderCard
-              key={provider.id}
-              provider={provider}
-              isSelected={selectedProvider?.id === provider.id}
-              onClick={() => onSelectProvider(provider)}
-            />
+    <div className={className}>
+      <div className="mb-6 space-y-4">
+        <Input
+          type="text"
+          placeholder="Search providers by name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Select
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+          placeholder="Filter by location"
+        >
+          <option value="">All locations</option>
+          {locations.map(location => (
+            <option key={location.value} value={location.value}>
+              {location.label}
+            </option>
           ))}
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredProviders.map((provider) => (
+          <button
+            key={provider.id}
+            type="button"
+            className="w-full text-left focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg"
+            onClick={() => onSelectProvider(provider)}
+          >
+            <Card
+              hoverable
+              className={`h-full transition-colors ${
+                selectedProvider?.id === provider.id
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'hover:border-gray-300'
+              }`}
+            >
+              <div className="p-4">
+                <div className="flex items-start gap-4">
+                  {provider.profileImage && (
+                    <img
+                      src={provider.profileImage}
+                      alt={`${provider.firstName} ${provider.lastName}`}
+                      className="w-20 h-20 rounded-full object-cover"
+                      onError={(e) => {
+                        // Hide image if it fails to load
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">
+                      Dr. {provider.firstName} {provider.lastName}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {provider.title}
+                    </p>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {provider.specialties.join(', ')}
+                    </div>
+                    {provider.rating && (
+                      <div className="flex items-center mt-2">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(provider.rating!) ? 'fill-current' : 'fill-gray-300'
+                              }`}
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="ml-1 text-sm text-gray-600">
+                          ({provider.rating})
+                        </span>
+                      </div>
+                    )}
+                    <div className="mt-2 text-sm text-gray-500">
+                      {provider.locations[0]?.name}
+                    </div>
+                    {provider.availabilityStatus && (
+                      <div className="mt-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          provider.availabilityStatus === 'available-today' 
+                            ? 'bg-green-100 text-green-800'
+                            : provider.availabilityStatus === 'available-week'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {provider.availabilityStatus === 'available-today' ? 'Available Today' :
+                           provider.availabilityStatus === 'available-week' ? 'Available This Week' :
+                           'Limited Availability'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </button>
+        ))}
+      </div>
+
+      {filteredProviders.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          No providers found matching your criteria
         </div>
       )}
     </div>
   );
-};
+}

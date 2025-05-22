@@ -1,15 +1,24 @@
-import { Appointment } from '../../entities/Appointment';
+import { Appointment, AppointmentRequest } from '../../entities/Appointment';
 
 export interface AppointmentRepository {
   findById(id: string): Promise<Appointment | null>;
-  findAll(): Promise<Appointment[]>;
-  findByPatientId(patientId: string): Promise<Appointment[]>;
-  findByProviderId(providerId: string): Promise<Appointment[]>;
-  findUpcoming(limit?: number): Promise<Appointment[]>;
+  findByPatient(patientId: string): Promise<Appointment[]>;
+  findByProvider(providerId: string): Promise<Appointment[]>;
   findByDateRange(startDate: string, endDate: string): Promise<Appointment[]>;
-  findByProviderAndDateRange(providerId: string, startDate: string, endDate: string): Promise<Appointment[]>;
-  create(appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment>;
-  update(id: string, appointment: Partial<Appointment>): Promise<Appointment>;
-  updateStatus(id: string, status: Appointment['status']): Promise<Appointment>;
-  delete(id: string): Promise<boolean>;
+  findUpcoming(patientId: string): Promise<Appointment[]>;
+  save(appointment: Appointment): Promise<void>;
+  create(request: AppointmentRequest): Promise<Appointment>;
+  update(appointment: Appointment): Promise<void>;
+  delete(id: string): Promise<void>;
+  
+  // Additional methods for appointment management
+  cancelAppointment(id: string): Promise<void>;
+  rescheduleAppointment(
+    id: string, 
+    newStartTime: string, 
+    newEndTime: string
+  ): Promise<void>;
+  confirmAppointment(id: string): Promise<void>;
+  markAsCompleted(id: string): Promise<void>;
+  markAsNoShow(id: string): Promise<void>;
 }

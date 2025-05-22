@@ -1,161 +1,108 @@
-import { Appointment } from '../../entities/Appointment';
+import { Appointment, AppointmentRequest, TimeSlot } from '../../entities/Appointment';
 import { AppointmentRepository } from '../../interfaces/repositories/AppointmentRepository';
-import { PatientRepository } from '../../interfaces/repositories/PatientRepository';
 import { ProviderRepository } from '../../interfaces/repositories/ProviderRepository';
+import { PatientRepository } from '../../interfaces/repositories/PatientRepository';
 
-export interface ScheduleAppointmentRequest {
-  patientId: string;
-  providerId: string;
-  startTime: string; // ISO format date-time
-  endTime: string;   // ISO format date-time
-  type: string;      // e.g., "INITIAL", "FOLLOW_UP", "PHYSICAL", etc.
-  reason: string;    // The reason for the appointment
-  locationId: string;
-  notes?: string;    // Optional notes about the appointment
+export interface ScheduleAppointmentResponse {
+  appointment: Appointment;
+  confirmationNumber: string;
 }
 
-export class ScheduleAppointment {
+export class ScheduleAppointmentUseCase {
   constructor(
     private readonly appointmentRepository: AppointmentRepository,
-    private readonly patientRepository: PatientRepository,
-    private readonly providerRepository: ProviderRepository
+    private readonly providerRepository: ProviderRepository,
+    private readonly patientRepository: PatientRepository
   ) {}
 
-  async execute(request: ScheduleAppointmentRequest): Promise<Appointment> {
-    const {
-      patientId,
-      providerId,
-      startTime,
-      endTime,
-      type,
-      reason,
-      locationId,
-      notes
-    } = request;
-
-    // Validate that patient exists
-    const patient = await this.patientRepository.findById(patientId);
+  async execute(request: AppointmentRequest): Promise<ScheduleAppointmentResponse> {
+    // Validate patient exists
+    const patient = await this.patientRepository.findById(request.patientId);
     if (!patient) {
-      throw new Error(`Patient with id ${patientId} not found`);
+      throw new Error(`Patient not found with ID: ${request.patientId}`);
     }
 
-    // Validate that provider exists
-    const provider = await this.providerRepository.findById(providerId);
+    // Validate provider exists
+    const provider = await this.providerRepository.findById(request.providerId);
     if (!provider) {
-      throw new Error(`Provider with id ${providerId} not found`);
+      throw new Error(`Provider not found with ID: ${request.providerId}`);
     }
 
-    // Validate that the provider has the specified location
-    const location = provider.locations.find(loc => loc.id === locationId);
-    if (!location) {
-      throw new Error(`Location with id ${locationId} not found for this provider`);
-    }
+    // Check if the requested time slot is available
+    const requestedSlot: TimeSlot = {
+      startTime: request.startTime,
+      endTime: request.endTime,
+      status: 'AVAILABLE'
+    };
 
-    // Check if the provider is available at the requested time
-    const isAvailable = await this.isProviderAvailableAt(
-      providerId,
-      startTime,
-      endTime
+    const isAvailable = await this.providerRepository.isAvailable(
+      request.providerId,
+      requestedSlot
     );
 
     if (!isAvailable) {
-      throw new Error('Provider is not available at the requested time');
+      throw new Error('The requested time slot is not available');
+    }
+
+    // Check for scheduling conflicts
+    const existingAppointments = await this.appointmentRepository.findByDateRange(
+      request.startTime,
+      request.endTime
+    );
+
+    const hasConflict = existingAppointments.some(appointment => {
+      return (
+        appointment.providerId === request.providerId &&
+        new Date(request.startTime) < new Date(appointment.endTime) &&
+        new Date(request.endTime) > new Date(appointment.startTime)
+      );
+    });
+
+    if (hasConflict) {
+      throw new Error('The requested time slot conflicts with an existing appointment');
+    }
+
+    // Check if patient has other appointments at the same time
+    const patientAppointments = await this.appointmentRepository.findByPatient(
+      request.patientId
+    );
+
+    const hasPatientConflict = patientAppointments.some(appointment => {
+      return (
+        new Date(request.startTime) < new Date(appointment.endTime) &&
+        new Date(request.endTime) > new Date(appointment.startTime)
+      );
+    });
+
+    if (hasPatientConflict) {
+      throw new Error('Patient has another appointment scheduled at this time');
     }
 
     // Create the appointment
-    const appointment = await this.appointmentRepository.create({
-      patientId,
-      providerId,
-      startTime,
-      endTime,
-      status: 'SCHEDULED',
-      type,
-      reason,
-      notes,
-      location: {
-        id: location.id,
-        name: location.name,
-        address: location.address
-      }
-    });
+    const appointment = Appointment.create(request);
 
-    return appointment;
+    // Save the appointment
+    await this.appointmentRepository.save(appointment);
+
+    // Generate a confirmation number
+    const confirmationNumber = this.generateConfirmationNumber(appointment);
+
+    return {
+      appointment,
+      confirmationNumber
+    };
   }
 
-  // Helper method to check if a provider is available
-  private async isProviderAvailableAt(
-    providerId: string,
-    startTime: string,
-    endTime: string
-  ): Promise<boolean> {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    
-    // Get the day of the week
-    const daysOfWeek = [
-      'sunday', 'monday', 'tuesday', 'wednesday',
-      'thursday', 'friday', 'saturday'
-    ] as const;
-    
-    const dayOfWeek = daysOfWeek[start.getDay()];
-    
-    // Check provider's general availability for this day
-    const provider = await this.providerRepository.findById(providerId);
-    if (!provider || !provider.availability) {
-      return false;
-    }
-    
-    const dayAvailability = provider.availability[dayOfWeek];
-    if (!dayAvailability || dayAvailability.length === 0) {
-      return false; // Provider doesn't work on this day
-    }
-    
-    // Extract just time portion from the datetime
-    const startHour = start.getHours();
-    const startMinute = start.getMinutes();
-    const endHour = end.getHours();
-    const endMinute = end.getMinutes();
-    
-    // Check if time falls within any of the provider's work periods
-    const isWithinWorkHours = dayAvailability.some(period => {
-      const periodStartHour = parseInt(period.startTime.split(':')[0]);
-      const periodStartMinute = parseInt(period.startTime.split(':')[1]);
-      const periodEndHour = parseInt(period.endTime.split(':')[0]);
-      const periodEndMinute = parseInt(period.endTime.split(':')[1]);
-      
-      // Create comparable numeric values (hours * 100 + minutes)
-      const timeStart = startHour * 100 + startMinute;
-      const timeEnd = endHour * 100 + endMinute;
-      const periodStart = periodStartHour * 100 + periodStartMinute;
-      const periodEnd = periodEndHour * 100 + periodEndMinute;
-      
-      return timeStart >= periodStart && timeEnd <= periodEnd;
-    });
-    
-    if (!isWithinWorkHours) {
-      return false;
-    }
-    
-    // Check for conflicts with existing appointments
-    const existingAppointments = await this.appointmentRepository.findByProviderAndDateRange(
-      providerId,
-      start.toISOString().split('T')[0], // Just the date part
-      end.toISOString().split('T')[0]    // Just the date part
-    );
-    
-    // Check if any existing appointment overlaps with the requested time
-    const hasConflict = existingAppointments.some(appointment => {
-      const appointmentStart = new Date(appointment.startTime);
-      const appointmentEnd = new Date(appointment.endTime);
-      
-      // Check for overlap
-      return (
-        (start >= appointmentStart && start < appointmentEnd) ||
-        (end > appointmentStart && end <= appointmentEnd) ||
-        (start <= appointmentStart && end >= appointmentEnd)
-      );
-    });
-    
-    return !hasConflict;
+  private generateConfirmationNumber(appointment: Appointment): string {
+    // Generate a unique confirmation number
+    // Format: YYYYMMDD-PROV-XXXX
+    const date = new Date(appointment.startTime);
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const providerPrefix = appointment.providerId.slice(0, 4).toUpperCase();
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
+
+    return `${dateStr}-${providerPrefix}-${random}`;
   }
 }

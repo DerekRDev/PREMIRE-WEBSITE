@@ -54,6 +54,14 @@ interface Appointment {
     name: string;
     address: string;
   };
+  provider?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    title: string;
+    profileImage?: string;
+    specialties: string[];
+  };
 }
 
 enum SchedulingStep {
@@ -97,10 +105,31 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   const [scheduledAppointment, setScheduledAppointment] = useState<Appointment | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>();
+  const [showNextHint, setShowNextHint] = useState<boolean>(false);
+  
+  // Function to scroll to and highlight the next button
+  const scrollToNextButton = () => {
+    setTimeout(() => {
+      const nextButton = document.querySelector('[data-next-button]') as HTMLElement;
+      if (nextButton) {
+        nextButton.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        setShowNextHint(true);
+        // Hide hint after 4 seconds
+        setTimeout(() => setShowNextHint(false), 4000);
+      }
+    }, 500);
+  };
   
   // Move to the next step based on current step
   const handleNext = async () => {
     setError(undefined);
+    setShowNextHint(false); // Hide hint when proceeding
+    
+    // Scroll to top when moving to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     if (currentStep === SchedulingStep.SPECIALTY) {
       if (!selectedSpecialty) {
@@ -189,8 +218,9 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
             appointment = await scheduleAppointment(appointmentData);
           } else {
             // Mock appointment data for demo purposes
+            const timestamp = Date.now();
             appointment = {
-              id: `appt-${Date.now()}`,
+              id: `appt-${timestamp}`,
               patientId,
               providerId: selectedSlot.providerId,
               providerName: selectedSlot.providerName,
@@ -203,7 +233,16 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                 name: selectedSlot.locationName,
                 address: selectedProvider.locations.find(loc => loc.id === selectedSlot.locationId)?.address || '',
               },
+              provider: {
+                id: selectedProvider.id,
+                firstName: selectedProvider.firstName,
+                lastName: selectedProvider.lastName,
+                title: selectedProvider.title,
+                profileImage: selectedProvider.profileImage,
+                specialties: selectedProvider.specialties,
+              },
             };
+            
           }
           
           setScheduledAppointment(appointment);
@@ -226,6 +265,9 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   // Go back to the previous step
   const handleBack = () => {
     setError(undefined);
+    
+    // Scroll to top when going back
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -252,7 +294,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
           <SpecialtySelection
             specialties={specialties}
             selectedSpecialty={selectedSpecialty}
-            onSelect={setSelectedSpecialty}
+            onSelect={(specialty) => {
+              setSelectedSpecialty(specialty);
+              scrollToNextButton();
+            }}
           />
         );
       
@@ -262,7 +307,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
             providers={providers}
             specialtyId={selectedSpecialty}
             selectedProvider={selectedProvider}
-            onSelectProvider={setSelectedProvider}
+            onSelectProvider={(provider) => {
+              setSelectedProvider(provider);
+              scrollToNextButton();
+            }}
           />
         );
       
@@ -271,7 +319,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
           <DateTimeSelection
             availableSlots={availableSlots}
             selectedSlot={selectedSlot}
-            onSelectSlot={setSelectedSlot}
+            onSelectSlot={(slot) => {
+              setSelectedSlot(slot);
+              scrollToNextButton();
+            }}
           />
         );
       
@@ -352,6 +403,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
       case SchedulingStep.CONFIRMATION:
         return scheduledAppointment ? (
           <AppointmentConfirmation
+            key={scheduledAppointment.id}
             appointment={scheduledAppointment}
             onReschedule={handleReset}
             onCancel={onCancel}
@@ -384,6 +436,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
           onChange={(tab) => {
             // Only allow going back to previous steps
             if (tab < currentStep) {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
               setCurrentStep(tab);
             }
           }}
@@ -419,8 +472,20 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
               </Button>
             )}
             
-            <Button variant="primary" onClick={handleNext} disabled={isLoading}>
+            <Button 
+              variant="primary" 
+              onClick={handleNext} 
+              disabled={isLoading}
+              data-next-button
+              className={`relative transition-all duration-300 ${showNextHint ? 'ring-4 ring-blue-300 ring-opacity-75 scale-105' : ''}`}
+            >
               {currentStep === SchedulingStep.REASON ? 'Schedule Appointment' : 'Next'}
+              {showNextHint && (
+                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap animate-pulse shadow-lg">
+                  Click here to continue →
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
+                </div>
+              )}
             </Button>
           </div>
         )}

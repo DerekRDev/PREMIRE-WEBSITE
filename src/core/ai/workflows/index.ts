@@ -30,4 +30,5 @@ export const allWorkflows: Workflow[] = [
   
   // Tour workflows
   tourWorkflows.quickTourWorkflow,
+  tourWorkflows.appointmentBookingWorkflow,
 ];

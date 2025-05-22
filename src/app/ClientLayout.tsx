@@ -13,7 +13,8 @@ import { allWorkflows } from '@/core/ai/workflows';
 console.log('Workflows available:', allWorkflows);
 console.log('Number of workflows:', allWorkflows.length);
 allWorkflows.forEach(workflow => {
-  console.log(`Workflow: ${workflow.id}, Steps: ${workflow.steps.length}`);
+  const stepCount = workflow.steps?.length || workflow.modalSteps?.length || 0;
+  console.log(`Workflow: ${workflow.id}, Steps: ${stepCount}`);
 });
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {

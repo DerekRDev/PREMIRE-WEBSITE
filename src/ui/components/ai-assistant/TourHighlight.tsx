@@ -8,12 +8,13 @@ interface TourHighlightProps {
   elementId?: string;       // ID of the element to highlight
   title: string;            // Title of the highlighted feature
   description: string;      // Description of the highlighted feature
-  position?: 'top' | 'bottom' | 'left' | 'right'; // Position of the tooltip
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center'; // Position of the tooltip
   onNext?: () => void;      // Callback for next step
   onPrevious?: () => void;  // Callback for previous step
   onClose?: () => void;     // Callback for closing the tour
   isLast?: boolean;         // Is this the last step in the tour
   isFirst?: boolean;        // Is this the first step in the tour
+  tourType?: string;        // Type of tour to determine overlay behavior
 }
 
 export const TourHighlight: React.FC<TourHighlightProps> = ({
@@ -27,6 +28,7 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
   onClose,
   isLast = false,
   isFirst = false,
+  tourType,
 }) => {
   const [targetElement, setTargetElement] = useState<Element | null>(null);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -113,50 +115,88 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
   const getTooltipStyle = () => {
     if (!targetRect) return {};
     
-    // For center positioning, use these styles regardless of position
-    return {
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    };
-    
-    // Original position-based tooltip placement code kept for reference
-    /* 
-    const padding = 10; // Padding around the element
+    const padding = 20; // Padding around the element
+    const tooltipWidth = window.innerWidth < 768 ? window.innerWidth * 0.9 : 500; // Responsive width
     
     switch (position) {
       case 'top':
+        // Calculate centered position but keep within screen bounds
+        const topCenterLeft = targetRect.left + (targetRect.width / 2);
+        const topMaxLeft = window.innerWidth - tooltipWidth - 20; // 20px margin from right edge
+        const topMinLeft = 20; // 20px margin from left edge
+        const topFinalLeft = Math.max(topMinLeft, Math.min(topCenterLeft, topMaxLeft));
+        
         return {
           bottom: `${window.innerHeight - targetRect.top + padding}px`,
-          left: `${targetRect.left + (targetRect.width / 2)}px`,
-          transform: 'translateX(-50%)',
+          left: `${topFinalLeft}px`,
+          transform: topFinalLeft === topCenterLeft ? 'translateX(-50%)' : 'none',
         };
       case 'bottom':
+        // Calculate centered position but keep within screen bounds  
+        const bottomCenterLeft = targetRect.left + (targetRect.width / 2);
+        const bottomMaxLeft = window.innerWidth - tooltipWidth - 20; // 20px margin from right edge
+        const bottomMinLeft = 20; // 20px margin from left edge
+        const bottomFinalLeft = Math.max(bottomMinLeft, Math.min(bottomCenterLeft, bottomMaxLeft));
+        
         return {
           top: `${targetRect.bottom + padding}px`,
-          left: `${targetRect.left + (targetRect.width / 2)}px`,
-          transform: 'translateX(-50%)',
+          left: `${bottomFinalLeft}px`,
+          transform: bottomFinalLeft === bottomCenterLeft ? 'translateX(-50%)' : 'none',
         };
       case 'left':
+        // For left positioning, position tooltip to the left of the target element
+        const minRightMargin = 20; // Minimum margin from right edge
+        const targetLeftEdge = targetRect.left - padding;
+        
+        // Calculate how much space we need for the tooltip
+        const spaceNeededFromRight = window.innerWidth - targetLeftEdge;
+        const maxAllowedRight = window.innerWidth - tooltipWidth - minRightMargin;
+        
+        // Position the tooltip to the left of the target, but ensure it stays on screen
+        const finalRight = Math.min(spaceNeededFromRight, maxAllowedRight);
+        
         return {
           top: `${targetRect.top + (targetRect.height / 2)}px`,
-          right: `${window.innerWidth - targetRect.left + padding}px`,
+          right: `${Math.max(finalRight, minRightMargin)}px`,
           transform: 'translateY(-50%)',
         };
       case 'right':
+        // Calculate position to ensure tooltip stays on screen
+        let leftPosition = targetRect.right + padding;
+        const maxLeft = window.innerWidth - tooltipWidth - 20; // 20px margin from edge
+        
+        // If positioning to the right would push tooltip off screen, position it to the left instead
+        if (leftPosition + tooltipWidth > window.innerWidth - 20) {
+          leftPosition = targetRect.left - tooltipWidth - padding;
+          // Ensure it doesn't go off the left edge
+          leftPosition = Math.max(leftPosition, 20);
+        }
+        
         return {
-          top: `${targetRect.top + (targetRect.height / 2)}px`,
-          left: `${targetRect.right + padding}px`,
-          transform: 'translateY(-50%)',
+          top: `${targetRect.bottom + 10}px`, // Slightly below the button instead of centered
+          left: `${leftPosition}px`,
+          transform: 'none', // No transform needed
+        };
+      case 'center':
+        // Center the tooltip on the screen
+        return {
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
         };
       default:
+        // Default fallback uses bottom positioning with boundary checks
+        const defaultCenterLeft = targetRect.left + (targetRect.width / 2);
+        const defaultMaxLeft = window.innerWidth - tooltipWidth - 20;
+        const defaultMinLeft = 20;
+        const defaultFinalLeft = Math.max(defaultMinLeft, Math.min(defaultCenterLeft, defaultMaxLeft));
+        
         return {
           top: `${targetRect.bottom + padding}px`,
-          left: `${targetRect.left + (targetRect.width / 2)}px`,
-          transform: 'translateX(-50%)',
+          left: `${defaultFinalLeft}px`,
+          transform: defaultFinalLeft === defaultCenterLeft ? 'translateX(-50%)' : 'none',
         };
     }
-    */
   };
 
   // Create the highlight cutout effect
@@ -172,30 +212,43 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
       height: `${targetRect.height + (padding * 2)}px`,
       borderRadius: '4px',
       border: '2px solid #3b82f6',
-      boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
       zIndex: 10000
     };
   };
 
-  // Don't render if there's no target
-  if (!targetElement || !targetRect) {
+  // Don't render if there's no target, unless it's center position (which doesn't need a target)
+  if ((!targetElement || !targetRect) && position !== 'center') {
     return null;
   }
 
   // Use portal to render the overlay at the document root
   return createPortal(
     <div className="tour-overlay" ref={overlayRef}>
-      {/* Removed overlay since we're using boxShadow for the cutout effect */}
+      {/* Conditional overlay behavior based on tour type */}
+      {tourType === 'appointment_booking_tour' ? (
+        // For appointment booking tour: non-blocking overlay that allows interactions
+        <div 
+          className="fixed inset-0 pointer-events-none z-[9999]"
+        />
+      ) : (
+        // For quick tour: blocking overlay
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-20 z-[9999]"
+          onClick={onClose}
+        />
+      )}
       
-      {/* Highlight focus area - using a cutout effect */}
-      <div
-        ref={highlightRef}
-        className="absolute z-[10000]"
-        style={{
-          ...getHighlightStyle(),
-          animation: 'pulse 2s infinite',
-        }}
-      />
+      {/* Highlight focus area - only show if we have a target and it's not center position */}
+      {targetElement && targetRect && position !== 'center' && (
+        <div
+          ref={highlightRef}
+          className="absolute z-[10000]"
+          style={{
+            ...getHighlightStyle(),
+            animation: 'pulse 2s infinite',
+          }}
+        />
+      )}
       
       {/* Tooltip */}
       <div 
@@ -257,13 +310,16 @@ export const TourHighlight: React.FC<TourHighlightProps> = ({
         
         @keyframes pulse {
           0% { 
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+            border-color: rgba(59, 130, 246, 1);
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
           }
           70% { 
-            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+            border-color: rgba(59, 130, 246, 0.8);
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
           }
           100% { 
-            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 0 9999px rgba(0, 0, 0, 0.75); 
+            border-color: rgba(59, 130, 246, 1);
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
           }
         }
       `}</style>

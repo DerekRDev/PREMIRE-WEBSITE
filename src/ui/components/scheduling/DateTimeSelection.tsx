@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar } from '../../design-system/components/Calendar';
 import { TimeSlotGrid } from './TimeSlotGrid';
+import { TimeSlot as CoreTimeSlot } from '../../../core/entities/Appointment';
 
-interface TimeSlot {
+export interface UITimeSlot {
   startTime: string; // ISO format date-time
   endTime: string;   // ISO format date-time
   providerId: string;
@@ -12,9 +13,9 @@ interface TimeSlot {
 }
 
 export interface DateTimeSelectionProps {
-  availableSlots: TimeSlot[];
-  onSelectSlot: (slot: TimeSlot) => void;
-  selectedSlot?: TimeSlot;
+  availableSlots: UITimeSlot[];
+  selectedSlot?: UITimeSlot;
+  onSelectSlot: (slot: UITimeSlot) => void;
   className?: string;
 }
 
@@ -25,7 +26,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   className = '',
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<TimeSlot[]>([]);
+  const [slotsForSelectedDate, setSlotsForSelectedDate] = useState<UITimeSlot[]>([]);
   
   // Find the available dates from the available slots
   const availableDates = React.useMemo(() => {

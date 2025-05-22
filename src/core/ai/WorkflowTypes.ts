@@ -2,13 +2,38 @@
  * TypeScript interfaces for the AI Patient Assistant workflow schema
  */
 
+import { AudioManager } from './AudioManager';
+
+// Tour state for modal-based workflows
+export interface TourState {
+  isModalOpen: boolean;
+  currentStepIndex: number;
+  audioManager: AudioManager | null;
+}
+
+// Step definition for modal-based tours
+export interface ModalStep {
+  id: string;
+  message: string;
+  audioFile: string;
+  isTyping: boolean;
+}
+
 // Main workflow definition
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
   initialStep: string;
-  steps: WorkflowStep[];
+  steps?: WorkflowStep[];
+  modalSteps?: ModalStep[];
+  initialState?: TourState;
+  methods?: {
+    startTour?: (state: TourState) => TourState;
+    nextStep?: (state: TourState) => TourState;
+    endTour?: (state: TourState) => TourState;
+    [key: string]: ((state: TourState) => TourState) | undefined;
+  };
 }
 
 // Step in a workflow

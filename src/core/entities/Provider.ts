@@ -1,30 +1,189 @@
-export interface Provider {
-  id: string;
-  firstName: string;
-  lastName: string;
-  title: string;
-  specialties: string[];
-  npi: string;
-  profileImage?: string;
-  locations: Array<{
-    id: string;
-    name: string;
-    address: string;
-  }>;
-  availability?: {
-    monday: TimeSlot[];
-    tuesday: TimeSlot[];
-    wednesday: TimeSlot[];
-    thursday: TimeSlot[];
-    friday: TimeSlot[];
-    saturday: TimeSlot[];
-    sunday: TimeSlot[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
+import { Location, TimeSlot } from './Appointment';
+
+export interface WorkingHours {
+  dayOfWeek: number; // 0-6, where 0 is Sunday
+  startTime: string; // HH:mm format
+  endTime: string;   // HH:mm format
+  breakStart?: string; // Optional break time
+  breakEnd?: string;
 }
 
-export interface TimeSlot {
-  startTime: string; // 24-hour format, e.g., "09:00"
-  endTime: string; // 24-hour format, e.g., "17:00"
+export interface Specialty {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface Schedule {
+  workingHours: WorkingHours[];
+  blockedTimes: TimeSlot[];
+}
+
+export class Provider {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly specialties: Specialty[],
+    public readonly locations: Location[],
+    private schedule: Schedule,
+    public readonly email: string,
+    public readonly phone: string,
+    public readonly imageUrl?: string,
+    public readonly biography?: string,
+    public readonly education?: string[],
+    public readonly languages?: string[]
+  ) {}
+
+  public getSchedule(): Schedule {
+    return { ...this.schedule };
+  }
+
+  public updateSchedule(newSchedule: Schedule): void {
+    this.schedule = { ...newSchedule };
+  }
+
+  public isAvailable(slot: TimeSlot): boolean {
+    // Check if the slot falls within working hours
+    const slotDate = new Date(slot.startTime);
+    const dayOfWeek = slotDate.getDay();
+    const workingHoursForDay = this.schedule.workingHours.find(
+      hours => hours.dayOfWeek === dayOfWeek
+    );
+
+    if (!workingHoursForDay) {
+      return false; // Provider doesn't work on this day
+    }
+
+    // Convert slot time to hours and minutes for comparison
+    const slotStartTime = this.getTimeString(new Date(slot.startTime));
+    const slotEndTime = this.getTimeString(new Date(slot.endTime));
+
+    // Check if slot is within working hours
+    if (
+      slotStartTime < workingHoursForDay.startTime ||
+      slotEndTime > workingHoursForDay.endTime
+    ) {
+      return false;
+    }
+
+    // Check if slot overlaps with break time
+    if (
+      workingHoursForDay.breakStart &&
+      workingHoursForDay.breakEnd &&
+      slotStartTime < workingHoursForDay.breakEnd &&
+      slotEndTime > workingHoursForDay.breakStart
+    ) {
+      return false;
+    }
+
+    // Check if slot overlaps with any blocked times
+    const isBlocked = this.schedule.blockedTimes.some(blockedSlot => {
+      return (
+        slot.startTime < blockedSlot.endTime &&
+        slot.endTime > blockedSlot.startTime
+      );
+    });
+
+    return !isBlocked;
+  }
+
+  public getAvailableSlots(
+    startDate: Date,
+    endDate: Date,
+    duration: number = 30 // duration in minutes
+  ): TimeSlot[] {
+    const availableSlots: TimeSlot[] = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const dayOfWeek = currentDate.getDay();
+      const workingHoursForDay = this.schedule.workingHours.find(
+        hours => hours.dayOfWeek === dayOfWeek
+      );
+
+      if (workingHoursForDay) {
+        const daySlots = this.generateSlotsForDay(
+          currentDate,
+          workingHoursForDay,
+          duration
+        );
+        availableSlots.push(...daySlots);
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return availableSlots;
+  }
+
+  private generateSlotsForDay(
+    date: Date,
+    workingHours: WorkingHours,
+    duration: number
+  ): TimeSlot[] {
+    const slots: TimeSlot[] = [];
+    const [startHour, startMinute] = workingHours.startTime.split(':').map(Number);
+    const [endHour, endMinute] = workingHours.endTime.split(':').map(Number);
+
+    const startTime = new Date(date);
+    startTime.setHours(startHour, startMinute, 0, 0);
+
+    const endTime = new Date(date);
+    endTime.setHours(endHour, endMinute, 0, 0);
+
+    while (startTime < endTime) {
+      const slotEnd = new Date(startTime);
+      slotEnd.setMinutes(slotEnd.getMinutes() + duration);
+
+      if (slotEnd <= endTime) {
+        const slot: TimeSlot = {
+          startTime: startTime.toISOString(),
+          endTime: slotEnd.toISOString(),
+          status: 'AVAILABLE'
+        };
+
+        if (this.isAvailable(slot)) {
+          slots.push(slot);
+        }
+      }
+
+      startTime.setMinutes(startTime.getMinutes() + duration);
+    }
+
+    return slots;
+  }
+
+  private getTimeString(date: Date): string {
+    return `${date.getHours().toString().padStart(2, '0')}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
+  public static create(
+    name: string,
+    specialties: Specialty[],
+    locations: Location[],
+    schedule: Schedule,
+    email: string,
+    phone: string,
+    imageUrl?: string,
+    biography?: string,
+    education?: string[],
+    languages?: string[]
+  ): Provider {
+    return new Provider(
+      `provider-${Date.now()}`, // In a real app, this would be generated by the database
+      name,
+      specialties,
+      locations,
+      schedule,
+      email,
+      phone,
+      imageUrl,
+      biography,
+      education,
+      languages
+    );
+  }
 }
