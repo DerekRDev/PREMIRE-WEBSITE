@@ -324,12 +324,8 @@ export default function AppointmentsPage() {
   const modalSteps = appointmentBookingWorkflow.modalSteps;
   
   const handleStartTour = () => {
-    console.log('Tour button clicked');
-    console.log('Current state before initialize:', state);
     initialize();
-    console.log('Starting appointment_booking_tour workflow');
     startWorkflow('appointment_booking_tour');
-    console.log('Current state after startWorkflow:', state);
   };
   
   const handleModalClose = () => {
@@ -393,14 +389,7 @@ export default function AppointmentsPage() {
         />
       </div>
 
-      {/* Debug info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-4 left-4 bg-black text-white p-2 text-xs z-50">
-          State: {state.uiState} | Workflow: {state.currentWorkflowId} | Step: {state.currentStepId}
-        </div>
-      )}
-
-      {/* Use the standard AI Assistant workflow instead of the custom modal */}
+      {/* Use the existing AI Assistant workflow system */}
       {/* The AI Assistant will handle the appointment booking tour automatically */}
     </div>
   );

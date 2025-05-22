@@ -130,8 +130,34 @@ module.exports = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  	},
+  	keyframes: {
+  			fadeIn: {
+  			  '0%': { opacity: '0' },
+  			  '100%': { opacity: '1' }
+  			},
+  			slideUp: {
+  			  '0%': { transform: 'translateY(20px)', opacity: '0' },
+  			  '100%': { transform: 'translateY(0)', opacity: '1' }
+  			},
+  			slideInRight: {
+  			  '0%': { transform: 'translateX(20px)', opacity: '0' },
+  			  '100%': { transform: 'translateX(0)', opacity: '1' }
+  			},
+  			bounceIn: {
+  			  '0%': { transform: 'scale(0.3)', opacity: '0' },
+  			  '50%': { transform: 'scale(1.05)' },
+  			  '70%': { transform: 'scale(0.9)' },
+  			  '100%': { transform: 'scale(1)', opacity: '1' }
+  			}
+  	},
+  	animation: {
+  			fadeIn: 'fadeIn 0.3s ease-out',
+  			slideUp: 'slideUp 0.4s ease-out',
+  			slideInRight: 'slideInRight 0.4s ease-out',
+  			bounceIn: 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
   	}
-  },
+ }
+},
   plugins: [require("tailwindcss-animate")],
 }

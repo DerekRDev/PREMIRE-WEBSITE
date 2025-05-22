@@ -7,4 +7,3 @@ export { useTourManager } from './TourManager';
 export { ViewRenderer } from './ViewRenderer';
 export { useTourConfigProvider } from './TourConfigProvider';
 export { TourCompleteView } from './TourCompleteView';
-export { DebugPanel } from './DebugPanel';

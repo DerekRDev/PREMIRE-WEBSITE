@@ -7,8 +7,7 @@ import {
   useTourManager, 
   ViewRenderer, 
   useTourConfigProvider, 
-  TourCompleteView, 
-  DebugPanel 
+  TourCompleteView
 } from './tour';
 import { TourView } from './TourView';
 
@@ -49,17 +48,9 @@ export const AIAssistantContainer: React.FC = () => {
   }, []);
   
   // Handle rendering conditions
-  if (!currentStep) {
-    console.log('AIAssistantContainer: not rendering - no currentStep');
+  if (!currentStep || state.uiState === "hidden") {
     return null;
   }
-  
-  if (state.uiState === "hidden") {
-    console.log('AIAssistantContainer: not rendering - state is hidden');
-    return null;
-  }
-  
-  console.log('AIAssistantContainer: rendering content with displayType:', currentStep.displayType);
 
   // Check if this is the appointment booking tour (non-blocking)
   const isAppointmentBookingTour = state.currentWorkflowId === 'appointment_booking_tour';
@@ -68,8 +59,8 @@ export const AIAssistantContainer: React.FC = () => {
     <>
       {/* Regular assistant UI - only show blocking overlay for non-appointment tours */}
       {!tourState.isActive && !tourState.showTourComplete && !isAppointmentBookingTour && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="max-w-md w-full mx-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fadeIn transition-opacity duration-300">
+          <div className="max-w-md w-full mx-4 transform animate-slideUp transition-transform duration-300 hover:scale-102">
             {/* Render appropriate view based on current step */}
             <ViewRenderer 
               currentStep={currentStep} 
@@ -77,17 +68,15 @@ export const AIAssistantContainer: React.FC = () => {
               onClose={hideAssistant} 
             />
             
-            {/* Debug controls */}
-            <DebugPanel state={state} currentStep={currentStep} />
           </div>
         </div>
       )}
       
       {/* Appointment booking tour - non-blocking popup positioned to side */}
       {!tourState.isActive && !tourState.showTourComplete && isAppointmentBookingTour && (
-        <div className="fixed inset-0 pointer-events-none z-[9999]">
+        <div className="fixed inset-0 pointer-events-none z-[9999] animate-fadeIn transition-opacity duration-300">
           <div className="absolute top-1/2 right-8 transform -translate-y-1/2 pointer-events-auto">
-            <div className="max-w-sm w-full">
+            <div className="max-w-sm w-full transform animate-slideInRight transition-all duration-300 hover:translate-x-[-4px]">
               {/* Render appropriate view based on current step */}
               <ViewRenderer 
                 currentStep={currentStep} 
@@ -95,8 +84,6 @@ export const AIAssistantContainer: React.FC = () => {
                 onClose={hideAssistant} 
               />
               
-              {/* Debug controls */}
-              <DebugPanel state={state} currentStep={currentStep} />
             </div>
           </div>
         </div>
@@ -116,7 +103,9 @@ export const AIAssistantContainer: React.FC = () => {
       
       {/* Tour complete celebration UI */}
       {tourState.showTourComplete && (
-        <TourCompleteView onClose={handleTourCompleteClose} />
+        <div className="animate-bounceIn">
+          <TourCompleteView onClose={handleTourCompleteClose} />
+        </div>
       )}
     </>
   );
