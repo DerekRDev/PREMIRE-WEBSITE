@@ -16,10 +16,12 @@ export default function FamilyMedicinePage() {
           quality={90}
         />
         <div className="absolute inset-0 bg-blue-900/40" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="container mx-auto px-4 text-center text-white">
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Family Medicine</h1>
-            <p className="text-xl md:text-2xl">Comprehensive care for your entire family</p>
+        <div className="absolute inset-0 flex items-center">
+          <div className="container mx-auto px-4">
+            <div className="max-w-lg text-white">
+              <h1 className="mb-4 text-4xl font-bold md:text-5xl">Family Medicine</h1>
+              <p className="text-xl md:text-2xl">Comprehensive care for your entire family</p>
+            </div>
           </div>
         </div>
       </div>

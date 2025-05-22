@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppointmentContext, useAppointmentActions } from '../../providers/appointments/AppointmentContext';
+import { useAIAssistant } from '../../providers/ai-assistant/AIAssistantProvider';
 import { FindAvailableSlotsUseCase } from '../../../core/usecases/appointment/FindAvailableSlots';
 import { ScheduleAppointmentUseCase } from '../../../core/usecases/appointment/ScheduleAppointment';
 import { AppointmentRequest, TimeSlot as CoreTimeSlot, AppointmentType, AppointmentStatus } from '../../../core/entities/Appointment';
@@ -12,6 +13,7 @@ import { AppointmentDetailsForm } from './AppointmentDetailsForm';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
 import { AppointmentSchedulerContainerProps, UIProvider, UIAppointment, toUIProvider, simpleProviderToUIProvider } from './types';
+import { getStepForSchedulerAction } from '../../../core/ai/workflows/tours/appointmentBookingWorkflow';
 
 enum SchedulingStep {
   SPECIALTY = 0,
@@ -56,6 +58,9 @@ export function AppointmentSchedulerContainer({
     setLoading,
     setError
   } = useAppointmentActions();
+  
+  // Add AI Assistant hook to detect and advance tour
+  const { state: aiState, selectChoice } = useAIAssistant();
 
   // Reset flow on unmount
   useEffect(() => {
@@ -71,6 +76,8 @@ export function AppointmentSchedulerContainer({
       const specialty = { id: specialtyId, name: 'Mock Specialty', description: '' };
       selectSpecialty(specialty);
       nextStep();
+      
+      // Tour advancement handled by Next button only
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to select specialty'));
     } finally {
@@ -83,6 +90,8 @@ export function AppointmentSchedulerContainer({
       setLoading(true);
       selectProvider(provider);
       nextStep();
+      
+      // Tour advancement handled by Next button only
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to select provider'));
     } finally {
@@ -96,6 +105,8 @@ export function AppointmentSchedulerContainer({
       const coreSlot = convertToCoreTimeSlot(slot);
       selectSlot(coreSlot);
       nextStep();
+      
+      // Tour advancement handled by Next button only
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to select time slot'));
     } finally {
@@ -260,7 +271,17 @@ export function AppointmentSchedulerContainer({
               onClick={
                 state.currentStep === SchedulingStep.DETAILS
                   ? handleScheduleAppointment
-                  : nextStep
+                  : () => {
+                      nextStep();
+                      
+                      // Advance tour if active - simply progress to next tour step
+                      if (aiState.currentWorkflowId === 'appointment_booking_tour') {
+                        setTimeout(() => {
+                          console.log('Advancing tour - current step:', aiState.currentStepId);
+                          selectChoice('next_step');
+                        }, 100); // Small delay to allow state to update
+                      }
+                    }
               }
               disabled={
                 state.loading ||

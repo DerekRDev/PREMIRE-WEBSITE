@@ -71,17 +71,10 @@ tours:
     id: appointment_booking_tour
     name: "Appointment Booking Tour"
     description: "A step-by-step guide through booking your first appointment"
-    initialStep: tour_intro
+    initialStep: provider_selection
     audioFiles:
-      tour_intro: appointment-booking/step1_intro.mp3
-      specialty_overview: appointment-booking/step2_specialty_overview.mp3
-      specialty_selection: appointment-booking/step3_select_specialty.mp3
-      specialty_selected: appointment-booking/step4_specialty_selected.mp3
-      provider_search_intro: appointment-booking/step5_provide_search_intro.mp3
-      provider_cards_overview: appointment-booking/step6_provider_cards.mp3
-      provider_selection: appointment-booking/step7_select_provider.mp3
-      date_selection: appointment-booking/step8_date_selection.mp3
-      time_selection: appointment-booking/step9_time_selection.mp3
+      provider_selection: appointment-booking/step2_specialty_overview2.mp3
+      date_time_selection: appointment-booking/step3_select_date_time.mp3
       appointment_details: appointment-booking/step10_appointment_details.mp3
       visit_reason: appointment-booking/step11_visit_reason.mp3
       appointment_confirmed: appointment-booking/step12_confirmation.mp3

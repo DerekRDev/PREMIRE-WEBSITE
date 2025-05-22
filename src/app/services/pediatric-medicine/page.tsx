@@ -16,7 +16,7 @@ export default function PediatricMedicinePage() {
           quality={90}
         />
         <div className="absolute inset-0 bg-blue-900/40" />
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-start justify-center pt-16 md:pt-24">
           <div className="container mx-auto px-4 text-center text-white">
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">Pediatric Medicine</h1>
             <p className="text-xl md:text-2xl">Specialized healthcare for children and adolescents</p>

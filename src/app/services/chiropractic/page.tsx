@@ -16,10 +16,12 @@ export default function ChiropracticPage() {
           quality={90}
         />
         <div className="absolute inset-0 bg-blue-900/40" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="container mx-auto px-4 text-center text-white">
-            <h1 className="mb-4 text-4xl font-bold md:text-5xl">Chiropractic Care</h1>
-            <p className="text-xl md:text-2xl">Natural, non-surgical solutions for pain relief and wellness</p>
+        <div className="absolute inset-0 flex items-center">
+          <div className="container mx-auto px-6 md:px-8 text-white">
+            <div className="max-w-2xl">
+              <h1 className="mb-4 text-4xl font-bold md:text-5xl lg:text-6xl">Chiropractic Care</h1>
+              <p className="text-xl md:text-2xl">Natural, non-surgical solutions for pain relief and wellness</p>
+            </div>
           </div>
         </div>
       </div>
